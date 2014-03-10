@@ -77,6 +77,20 @@ $(document).ready(function() {
 		}
 	});
 
+	$("#vid").dblclick(function() {
+		// if loops to check which fullscreen request it can use
+		var video = el("vid");
+		if (video.requestFullscreen) {
+			video.requestFullscreen();
+		} else if (video.msRequestFullscreen){
+			video.msRequestFullscreen();
+		} else if (video.mozRequestFullScreen){
+			video.mozRequestFullScreen();
+		} else if (video.webkitRequestFullscreen){
+			video.webkitRequestFullscreen();
+		}
+	});
+
 	$("#seekbar").mousedown(function(e) {
 		el("vid").currentTime = 1 / window.innerWidth * e.pageX * el("vid").duration;
 	});
@@ -143,6 +157,7 @@ $(document).ready(function() {
 		loggedIn = true;
 
 		loadCasts();
+		loadSettings();
 	});
 });
 
@@ -202,6 +217,21 @@ function loadCasts() {
 			$("#cast-context-menu").show();
 			e.preventDefault();
 		});
+	});
+}
+
+function loadSettings() {
+	get("account/settings", function(res) {
+		var categories = {};
+		for (var key in res) {
+			//var category = key.split("/")[0];
+			//categories[category] = {};
+			//categories[category][key.split("/")[1]] = res[key];
+			//if (!_.contains(categories, category)) {
+			//	categories.push(key);
+			//}
+		}
+		//console.log(categories.general.x);
 	});
 }
 
