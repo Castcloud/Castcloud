@@ -1,4 +1,5 @@
 var token,
+	username,
 	episodes = {},
 	root,
 	apiRoot,
@@ -10,8 +11,8 @@ $(document).ready(function() {
 		routes: {
 			"": "podcasts",
 			"podcasts": "podcasts",
-			"podcasts/:id": "episode",
-			"settings": "settings"
+			"settings": "settings",
+			"*any": "podcasts"
 		},
 
 		podcasts: function() {
@@ -24,16 +25,14 @@ $(document).ready(function() {
 			}
 		},
 
-		episode: function(id) {
-			$(".tab").hide();
-			$("#tab-podcasts").show();
-
-			playEpisode(id);
-		},
-
 		settings: function() {
 			$(".tab").hide();
-			$("#tab-settings").show();
+			if (!loggedIn) {
+				$("#tab-login").show();
+			}
+			else {
+				$("#tab-settings").show();
+			}
 		}
 	});
 
@@ -41,14 +40,7 @@ $(document).ready(function() {
 	root = path.substr(0, path.indexOf("client/") + 7);
 	apiRoot = root.replace("client", "api");
 
-	loadcss("style.css");
-
-	console.log("root: " + root);
-	console.log("apiRoot: " + apiRoot);
-
 	var router = new Router();
-
-	Backbone.history.start({ pushState: true, root: root });
 
 	$("a").click(function(e) {
 		e.preventDefault();
@@ -78,7 +70,6 @@ $(document).ready(function() {
 	});
 
 	$("#vid").dblclick(function() {
-		// if loops to check which fullscreen request it can use
 		var video = el("vid");
 		if (video.requestFullscreen) {
 			video.requestFullscreen();
@@ -90,16 +81,37 @@ $(document).ready(function() {
 			video.webkitRequestFullscreen();
 		}
 	});
-
+	var seeking = false;
 	$("#seekbar").mousedown(function(e) {
 		el("vid").currentTime = 1 / window.innerWidth * e.pageX * el("vid").duration;
+		seeking = true;
 	});
 
-	$("#button-login").click(function() {
+	$(document).mouseup(function() {
+		seeking = false;
+	});
+
+	$(document).mousemove(function(e) {
+		if (seeking) {
+			el("vid").currentTime = 1 / window.innerWidth * e.pageX * el("vid").duration;
+		}
+	});
+
+	$("#button-login").click(login);
+
+	$("#input-password").keydown(function(e) {
+		if (e.which == 13) {
+			login();
+		}
+	});
+
+	$("#button-logout").click(function() {
+		$.removeCookie("token");
+		$("#playbar").hide();
+		$("#topbar nav").hide();
+		$("#userinfo").hide();
 		$(".tab").hide();
-		$("#tab-podcasts").fadeIn("fast");
-		$("#playbar").slideDown("fast");
-		$("#topbar nav").fadeIn("fast");
+		$("#tab-login").show();
 	});
 
 	$("#vmenu-add").click(function() {
@@ -145,20 +157,18 @@ $(document).ready(function() {
 		});
 	});
 
-	$.post(apiRoot + "account/login", {
-		username: "user",
-		password: "pass",
-		clientname: "Castcloud",
-		clientdescription: "Best",
-		clientversion: "1.0",
-		uuid: "1881"
-	}, function(res) {
-		token = res.token;
-		loggedIn = true;
+	if ($.cookie("token") != null) {
+		token = $.cookie("token");
+		finishLogin();
 
-		loadCasts();
-		loadSettings();
-	});
+		$("#userinfo span").html($.cookie("username"));
+
+		$("#playbar").show();
+		$("#topbar nav").show();
+		$("#userinfo").show();
+	}
+
+	Backbone.history.start({ pushState: true, root: root });
 });
 
 function addFeed(feedurl) {
@@ -188,6 +198,44 @@ function playEpisode(id) {
 	$("#episode-desc").html(episodes[id].description);
 }
 
+function login() {
+	var username = $("#input-username").val();
+	$.post(apiRoot + "account/login", {
+		username: username,
+		password: $("#input-password").val(),
+		clientname: "Castcloud",
+		clientdescription: "Best",
+		clientversion: "1.0",
+		uuid: "1881"
+	}, function(res) {
+		token = res.token;
+		console.log(token);
+		if (token != null) {
+			$.cookie("token", token);
+			$.cookie("username", username);
+			
+			finishLogin();
+
+			$("#tab-podcasts").fadeIn("fast");
+			$("#playbar").slideDown("fast");
+			$("#topbar nav").fadeIn("fast");
+			$("#userinfo").fadeIn("fast");
+		}
+	});
+
+	$("#input-username").val("");
+	$("#input-password").val("");
+}
+
+function finishLogin() {
+	loggedIn = true;
+
+	$(".tab").hide();
+
+	loadCasts();
+	loadSettings();
+}
+
 function loadCasts() {
 	$("#podcasts").html("");
 	get("library/casts", function(res) {
@@ -198,6 +246,7 @@ function loadCasts() {
 				get("library/episodes/" + cc.id, function(res) {
 					$("#episodes").html("");
 					res.forEach(function(episode) {
+						if (episode.title == null) episode.title = "N/A";
 						$("#episodes").append('<div id="ep-' + episode.castcloud.id + '" class="cast">' + episode.title + "</div>");
 						$("#ep-" + episode.castcloud.id).click(function() {
 							playEpisode(episode.castcloud.id);
@@ -222,16 +271,22 @@ function loadCasts() {
 
 function loadSettings() {
 	get("account/settings", function(res) {
-		var categories = {};
+		var settings = {};
 		for (var key in res) {
-			//var category = key.split("/")[0];
-			//categories[category] = {};
-			//categories[category][key.split("/")[1]] = res[key];
-			//if (!_.contains(categories, category)) {
-			//	categories.push(key);
-			//}
+			var category = key.split("/")[0];
+			var setting = key.split("/")[1];
+			if (settings[category] == null) {
+				settings[category] = {};
+			}
+			settings[category][setting] = res[key];
+			
 		}
-		//console.log(categories.general.x);
+		for (var c in settings) {
+			$("#tab-settings").append("<h2>" + c + "</h2>");
+			for (var s in settings[c]) {
+				$("#tab-settings").append("<p><label>" + s + "</label><input type=\"text\"></p>");
+			}
+		}
 	});
 }
 
