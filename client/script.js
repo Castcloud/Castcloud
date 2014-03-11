@@ -234,13 +234,13 @@ function addFeed(feedurl) {
 
 function playEpisode(id) {
 	var video = el("vid");
-	video.setAttribute("src", episodes[id].enclosure.url);
+	video.setAttribute("src", episodes[id].feed.enclosure.url);
 	video.load();
 
 	$("#vid").show();
-	$("#episode-title").html(episodes[id].title);
-	$("#episode-desc").html(episodes[id].description);
-	$("#playbar-info").html(episodes[id].title);
+	$("#episode-title").html(episodes[id].feed.title);
+	$("#episode-desc").html(episodes[id].feed.description);
+	$("#playbar-info").html(episodes[id].feed.title);
 }
 
 function playPauseToggle() {
@@ -292,22 +292,24 @@ function finishLogin() {
 }
 
 function loadCasts() {
-	$("#podcasts").html("");
+	$("#podcasts").empty();
 	get("library/casts", function(res) {
+		var template = _.template($("script.podcasts").html());
+		$("#podcasts").append(template({ casts: res }));
+
 		res.forEach(function(cast) {
 			var cc = cast.castcloud;
-			$("#podcasts").append('<div id="cast-' + cc.id + '" class="cast">' + cast.title + "</div>");
+
 			$("#cast-" + cc.id).click(function() {
 				get("library/episodes/" + cc.id, function(res) {
-					$("#episodes").html("");
-					res.forEach(function(episode) {
-						if (episode.title == null) episode.title = "N/A";
-						$("#episodes").append('<div id="ep-' + episode.castcloud.id + '" class="cast">' + episode.title + "</div>");
-						$("#ep-" + episode.castcloud.id).click(function() {
-							playEpisode(episode.castcloud.id);
-						});
+					var template = _.template($("script.episodes").html());
+					$("#episodes").empty().append(template({ episodes: res }));
 
-						episodes[episode.castcloud.id] = episode;
+					res.forEach(function(episode) {
+						$("#ep-" + episode.id).click(function() {
+							playEpisode(episode.id);
+						});
+						episodes[episode.id] = episode;
 					});
 				});
 			});
@@ -359,10 +361,6 @@ function post(url, cb) {
 
 function el(id) {
 	return $("#" + id).get(0);
-}
-
-function loadcss(filename) {
-	$('head').append($('<link rel="stylesheet" type="text/css" />').attr('href', root + filename));
 }
 
 Number.prototype.pad = function() {
