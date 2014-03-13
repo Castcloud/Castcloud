@@ -110,7 +110,12 @@ $(document).ready(function() {
 				$("#vid-fs-overlay").fadeOut();
 			}, 1000);
 		}
-	})
+	});
+
+	$(".button-skipback").click(function() {
+		var video = el("vid");
+		video.currentTime = video.currentTime - 15;
+	});
 
 	$(".button-play").click(function() {
 		playPauseToggle();
@@ -122,6 +127,13 @@ $(document).ready(function() {
 			$(this).html("||");
 		}
 	});
+
+	$(".button-skipforward").click(function() {
+		var video = el("vid");
+		video.currentTime = video.currentTime + 15;
+	});
+
+	// type, itemid, positionts, concurrentorder, clientts
 
 	var seeking = false;
 	$("#seekbar").mousedown(function(e) {
