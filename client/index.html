@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta name="viewport" content="width=device-width">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 	<title>Castcloud</title>
 	<link href='//fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
 	<link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
@@ -9,8 +9,14 @@
 </head>
 <body>
 	<textarea id="clip"></textarea>
-	<div id="cast-context-menu">
-		<div id="cast-context-unsub">Remove</div>
+	<div id="cast-context-menu" class="context-menu">
+		<div id="">Show all episodes</div>
+		<div id="">Copy feed url</div>
+		<div id="cast-context-unsub">Unsubscribe</div>
+	</div>
+	<div id="episode-context-menu" class="context-menu">
+		<div id="">Reset playback</div>
+		<div id="episode-context-delete">Delete</div>
 	</div>
 	<div id="topbar">
 		<h1>Castcloud</h1>
@@ -79,22 +85,30 @@
 			<div id="overlay-info"><h5></h5><h2></h2></div>
 			<div id="overlay-loading"><i class="fa fa-spinner fa-spin fa-5x"></i><h3>Buffering...</h3></div>
 		</div>
-		<div id="playbar">
-			<div id="playbar-controls">
-				<button class="button button-skipback"><i class="fa fa-step-backward"></i></button>
-				<button class="button button-play"><i class="fa fa-play"></i></button>
-				<button class="button button-skipforward"><i class="fa fa-step-forward"></i></button>
-				<div id="volume"><div id="volume-top"></div></div>
-				<div id="seekbar"><div></div></div>
-				<h3 id="time">00:00/00:00</h3>
-				<i class="fa fa-gear fa-lg" id="playbar-gear"></i>
-			</div>
-			<div id="playbar-gear-menu">
-				<h4>Playback rate</h4>
-				<button class="button playback-rate" rate="0.5">0.5x</button>
-				<button class="button playback-rate selected" rate="1.0">1.0x</button>
-				<button class="button playback-rate" rate="1.5">1.5x</button>
-			</div>
+	</div>
+	<div id="playbar">
+		<div id="playbar-controls">
+			<button class="button button-skipback"><i class="fa fa-step-backward"></i></button>
+			<button class="button button-play"><i class="fa fa-play"></i></button>
+			<button class="button button-skipforward"><i class="fa fa-step-forward"></i></button>
+			<div id="volume"><div id="volume-top"></div></div>
+			<div id="seekbar"><div></div></div>
+			<h3 id="time">00:00/00:00</h3>
+			<i class="fa fa-gear fa-lg" id="playbar-gear"></i>
+		</div>
+		<div id="playbar-gear-menu">
+			<h4>
+				Playback rate
+				<select name="playback-rate">
+					<option value="0.5">0.5x</option>
+					<option value="1.0" selected>1.0x</option>
+					<option value="1.5">1.5x</option>
+				</select>
+			</h4>
+			
+			<button class="button playback-rate" rate="0.5">0.5x</button>
+			<button class="button playback-rate selected" rate="1.0">1.0x</button>
+			<button class="button playback-rate" rate="1.5">1.5x</button>
 		</div>
 	</div>
 

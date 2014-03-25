@@ -8,12 +8,14 @@
 		root,
 		apiRoot,
 		loggedIn = false,
-		contextCastId,
+		contextItemId,
 		currentEpisodeId = null,
+		selectedEpisodeId = null,
 		videoLoading = false,
 		castHovered = null,
 		ctrlDown = false,
-		autoplay = false;
+		autoplay = false,
+		switchingTabs = false;
 
 	var Event = {
 		Start: 10,
@@ -32,6 +34,7 @@
 				"podcasts": "podcasts",
 				"settings": "settings",
 				"now-playing": "nowPlaying",
+				"fullscreen":  "fullscreen",
 				"p:n": "foo",
 				"*any": "podcasts"
 			},
@@ -98,6 +101,11 @@
 					$("#vid-container").removeClass("thumb");
 					$("#tab-now-playing").show();
 				}
+			},
+
+			fullscreen: function() {
+				$("#vid-container").removeClass("thumb");
+				$("#vid-container").addClass("fs");
 			}
 		});
 
@@ -203,7 +211,20 @@
 		});
 
 		$("#vid-thumb-bar .popout").click(function() {
-			// YOLO
+			var video = el("vid");
+			if (!el("vid").paused) {
+				pushEvent(Event.Play);
+			}
+			video.setAttribute("src", "#");
+			video.load();
+
+			var poppedOut = window.open(root + "fullscreen");
+			$(poppedOut).on("beforeunload", function() {
+				currentEpisodeId = null;
+
+				// Possibly store lastevent in sessionstorage instead of this hack
+				setTimeout(function() { loadEpisodes(JSON.parse(sessionStorage.lastepisode).castid); }, 500);
+			});
 		});
 
 		$("#vid-thumb-bar .minimize").click(function() {
@@ -221,7 +242,7 @@
 				if (Backbone.history.fragment !== "now-playing") {
 					$("#vid-container").addClass("thumb");
 				}
-				$("#playbar").detach().appendTo("#main-container");
+				$("#playbar").detach().appendTo("body");
 				$("#playbar").show();
 				if (timer !== null) {
 					clearTimeout(timer);
@@ -441,7 +462,7 @@
 		});
 
 		$(document).click(function() {
-			$("#cast-context-menu").hide();
+			$(".context-menu").hide();
 		});
 
 		$("#volume").mousemove(function(e) {
@@ -453,12 +474,11 @@
 		});
 
 		$("#podcasts").on("contextmenu", ".cast", function(e) {
-			contextCastId = $(this).prop("id").split("-")[1];
+			showContextMenu("#cast-context-menu", this, e);
+		});
 
-			$("#cast-context-menu").css("left", e.pageX + "px");
-			$("#cast-context-menu").css("top", e.pageY + "px");
-			$("#cast-context-menu").show();
-			e.preventDefault();
+		$("#episodes").on("contextmenu", ".episode", function(e) {
+			showContextMenu("#episode-context-menu", this, e);
 		});
 
 		$("#podcasts").on("mouseover", ".cast", function() {
@@ -501,12 +521,16 @@
 			$(".cast.selected").each(function() {
 				$.ajax(apiRoot + "library/casts/" + $(this).prop("id").split("-")[1], { type: "DELETE" });
 			});
-			$.ajax(apiRoot + "library/casts/" + contextCastId, { 
+			$.ajax(apiRoot + "library/casts/" + contextItemId, { 
 				type: "DELETE",
 				success: function(res) {
 					loadCasts();
 				}
 			});
+		});
+
+		$("#episode-context-delete").click(function() {
+			console.log("DELETE: " + contextItemId);
 		});
 
 		$("#input-target").keyup(function(e) {
@@ -527,6 +551,10 @@
 					$("#input-target-container i").hide();
 				}
 			});
+		});
+
+		$("#pretty").click(function() {
+			playEpisode(selectedEpisodeId);
 		});
 		
 		if (sessionStorage.token) {
@@ -555,6 +583,14 @@
 			$("#pretty").prop("src", episodes[id].feed["media:thumbnail"].url);
 			$("#pretty").show();
 		}
+		else if (episodes[id].feed["itunes:image"]) {
+			$("#pretty").prop("src", episodes[id].feed["itunes:image"].href);
+			$("#pretty").show();
+		}
+		else if (casts[episodes[id].castid].feed["itunes:image"]) {
+			$("#pretty").prop("src", casts[episodes[id].castid].feed["itunes:image"].href);
+			$("#pretty").show();
+		}
 		else if (casts[episodes[id].castid].feed.image) {
 			$("#pretty").prop("src", casts[episodes[id].castid].feed.image.url);
 			$("#pretty").show();
@@ -581,7 +617,7 @@
 
 			loadEpisodeInfo(id);
 
-			$("#ep-" + currentEpisodeId + " i").remove();
+			$(".episode i").remove();
 
 			currentEpisodeId = id;
 
@@ -597,6 +633,9 @@
 
 			$("#vid-container").show();
 			$("#vid-container").removeClass("minimized");
+
+			$(".episode").removeClass("current");
+			$("#ep-" + id).addClass("current");
 		}
 	}
 
@@ -698,19 +737,29 @@
 			$("#podcasts").empty().append(template({ casts: res }));
 			positionThumb();
 
+			if (sessionStorage.lastepisode) {
+				var lastepisode = JSON.parse(sessionStorage.lastepisode);
+				loadEpisodes(lastepisode.castid);
+			}
 			if (sessionStorage.selectedcast) {
 				loadEpisodes(sessionStorage.selectedcast);
+				$("#cast-" + sessionStorage.selectedcast).addClass("current");
 			}
 
 			res.forEach(function(cast) {
 				casts[cast.id] = cast;
 
 				$("#cast-" + cast.id).click(function() {
-					loadEpisodes(cast.id);
-					sessionStorage.selectedcast = cast.id;
-
 					if (ctrlDown) {
 						$(this).toggleClass("selected");
+					}
+					else {
+						switchingTabs = true;
+						loadEpisodes(cast.id);
+						sessionStorage.selectedcast = cast.id;
+
+						$(".cast").removeClass("current");
+						$(this).addClass("current");
 					}
 				});
 			});
@@ -725,11 +774,18 @@
 
 			res.forEach(function(episode) {
 				$("#ep-" + episode.id).click(function() {
-					loadEpisodeInfo(episode.id);
+					if (ctrlDown) {
+						$(this).toggleClass("selected");
+						$(this).children(".bar").toggle();
+					}
+					else {
+						selectedEpisodeId = episode.id;
+						loadEpisodeInfo(episode.id);
+					}
 				});
 
 				$("#ep-" + episode.id).dblclick(function() {
-					sessionStorage.lastepisode = episode.id;
+					sessionStorage.lastepisode = JSON.stringify({ id: episode.id, castid: episode.castid });
 					autoplay = true;
 					playEpisode(episode.id);
 				});
@@ -739,8 +795,8 @@
 					$("#ep-" + episode.id + " .bar").css("width", (episode.lastevent.positionts / localStorage.getItem("episode-" + episode.id) * 100)+"%");
 				}
 
-				if (episode.id == currentEpisodeId) {
-					console.log(episode.lastevent.type);
+				if (switchingTabs && episode.id == currentEpisodeId) {
+					switchingTabs = false;
 					if (episode.lastevent.type == Event.Pause) {
 						$("#ep-" + episode.id).append('<i class="fa fa-pause"></i>');
 					}
@@ -751,7 +807,9 @@
 			});
 
 			if (sessionStorage.lastepisode) {
-				playEpisode(sessionStorage.lastepisode);
+				var lastepisode = JSON.parse(sessionStorage.lastepisode);
+				playEpisode(lastepisode.id);
+				$("#ep-" + lastepisode.id).addClass("current");
 			}
 
 			$(".episode").mouseover(function() {
@@ -802,7 +860,7 @@
 				else {
 					loadCasts($(this).text());
 					$("#tags button").removeClass("selected");
-					$($(this).addClass("selected"));
+					$(this).addClass("selected");
 				}
 			});
 		});
@@ -815,6 +873,16 @@
 		else {
 			$("#vid-container.thumb").css("right", "0px");
 		}
+	}
+
+	function showContextMenu(id, target, e) {
+		contextItemId = $(target).prop("id").split("-")[1];
+
+		$(id).css("left", e.pageX + "px");
+		$(id).css("top", e.pageY + "px");
+		$(".context-menu").hide();
+		$(id).show();
+		e.preventDefault();
 	}
 
 	function get(url, cb) {
