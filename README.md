@@ -1,6 +1,6 @@
 # Castcloud API documentation
 ## Introduction
-Castcloud is an RESTful API specifying how clients and servers should communicate a user’s podcast library to each other.
+Castcloud is a RESTful API specifying how clients and servers should communicate a user’s podcast library to each other.
 
 ### Features
 The server side of the API provides centralized metadata storage for making personal podcast libraries available to multiple clients. The metadata of the library is includes subscriptions, episodes, playback status and settings. The server side takes care of feedcrawling so that clients doesn't have to individually crawl all the users feeds. This improves speeds and simplefies some of the clients work.
