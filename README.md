@@ -54,8 +54,8 @@ Example:
 becomes
 ```JSON
 "guid":{
-"_" : "5B4B1B2C-F9C6-4DC2-B09F-B6DE889A9E25",
-"isPermaLink" : "false"
+	"_" : "5B4B1B2C-F9C6-4DC2-B09F-B6DE889A9E25",
+	"isPermaLink" : "false"
 }
 ```
 
@@ -127,7 +127,7 @@ There are two types of settings, global for all clients or client specific, thes
 	<tr>
 		<td>hotkey/playpause</td>
 		<td>spacebar,P,PlayPause</td>
-		<td rowspan=”5”>csv keyboard hotkeys</td>
+		<td rowspan="5">csv keyboard hotkeys</td>
 	</tr>
 	<tr>
 		<td>hotkey/forward_skip</td>
