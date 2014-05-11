@@ -280,5 +280,5 @@ The most important part of this call in making sure the output is clean and vali
 <style>
 .gist-data { max-height: 400px; overflow: auto; } 
 .gist .line, .gist .line-number { font-size:14px !important; line-height:25px !important; }
-.gist table { margin-bottom: 0;}
+.gist table { margin-bottom: 0 !important;}
 </style>
