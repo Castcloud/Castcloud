@@ -277,4 +277,7 @@ curl https:// UrlPath /api/library/labels -H "Authorization:SuperSecretToken"
 #### Server logic
 The most important part of this call in making sure the output is clean and valid. Therefor the output should be validated every time before it gets sent to a client. Clients should not have change the labels when they unsubscriobe from a podcast or subscribe to a new one. As defaut all casts and labels should be added to the root label. A cast does not have to be in root when it is inside another label. You might be interested in the function clean_Labels() inside db.php if you are trying to ensure clean labels.
 
-<style>.gist-data { max-height: 400px; overflow: auto; }</style>
+<style>
+.gist-data { max-height: 400px; overflow: auto; } 
+.gist .line, .gist .line-number { font-size:14px !important; line-height:25px !important; }
+</style>
