@@ -95,11 +95,11 @@ Check if the token is valid. Theres not much more too it.
 ### Account/Settings
 There are two types of settings, global for all clients or client specific, these are stored in a json format. A global setting describes a function found in most clients and is common between them. Client specific setting are used for client specific overrides or settings that are unique to your client. In an attempt to find common ground, the following setting names are recommended for their related functionality:
 
-<table>
+<table style="overflow: auto;">
 	<tr>
 		<th>Setting key</th>
 		<th>Values</th>
-		<th></th>
+		<th style="min-width:160px"></th>
 	</tr>
 	<tr>
 		<td>playback/forward_skip</td>
