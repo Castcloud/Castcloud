@@ -1,7 +1,7 @@
 # Castcloud API documentation
 ## Introduction
-Castcloud is a RESTful API specifying how clients and servers should communicate a user’s podcast library to each other.
-INSERT MORE
+Castcloud is a RESTful API specifying how podcast clients can communicate a user’s podcast library to each other via a server.
+<!-- INSERT MORE -->
 
 ### Features
 The server side of the API provides centralized metadata storage for making personal podcast libraries available to multiple clients. The metadata of the library includes subscriptions, episodes, playback status and settings. The server side takes care of feedcrawling so that clients doesn't have to individually crawl all the users feeds. This improves speed and simplefies some of the clients work.
@@ -13,7 +13,7 @@ We have made reference implementations of both server and client. The server imp
 All code is GPLv3 with some included utilities and libraries being Apache 2.0 and MIT License. This means you are free to make commercial software or solutions with our code, and in fact we encourage it!
 
 In the spirit of making something really useful for all users of podcasting software, we hope that all developers come together and make this a common standard and improved upon it instead of creating incompatibilities.
-MAYBE GET MORE SENTENCES
+<!-- MAYBE GET MORE SENTENCES -->
 
 ### Who we are
 We are 3 bachelor computer science students from Narvik University College in Norway. We are working on this project as our bachelor thesis. We hope to have a specification ready for implementation in time for our graduation in the beginning of June 2014. We hope this API specification will help solve an issue that in our opinion have plagued and hampered further growth and user adoption of podcasts.
@@ -96,7 +96,7 @@ Check if the token is valid.
 
 ### Account/Settings
 There are two types of settings, global for all clients or client specific. These are stored in a json format. A global setting describes a function found in most clients and is common among them. Client specific setting are used for client specific overrides or settings that are unique to your client. In an attempt to find common ground, the following setting names are recommended for their related functionality:
-MORE STUFFS CLIENT SYNC WOPDADOPA
+<!-- MORE STUFFS CLIENT SYNC WOPDADOPA -->
 
 <table style="overflow: auto;">
 	<tr>
