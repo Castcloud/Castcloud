@@ -1,9 +1,10 @@
 # Castcloud API documentation
 ## Introduction
 Castcloud is a RESTful API specifying how clients and servers should communicate a user’s podcast library to each other.
+INSERT MORE
 
 ### Features
-The server side of the API provides centralized metadata storage for making personal podcast libraries available to multiple clients. The metadata of the library is includes subscriptions, episodes, playback status and settings. The server side takes care of feedcrawling so that clients doesn't have to individually crawl all the users feeds. This improves speeds and simplefies some of the clients work.
+The server side of the API provides centralized metadata storage for making personal podcast libraries available to multiple clients. The metadata of the library includes subscriptions, episodes, playback status and settings. The server side takes care of feedcrawling so that clients doesn't have to individually crawl all the users feeds. This improves speed and simplefies some of the clients work.
 
 ### Reference implementations
 We have made reference implementations of both server and client. The server implements all server side functionality and the client uses a syncing model as far as possible for modern browsers (offline media storage is currently problematic).
@@ -11,20 +12,21 @@ We have made reference implementations of both server and client. The server imp
 ### License
 All code is GPLv3 with some included utilities and libraries being Apache 2.0 and MIT License. This means you are free to make commercial software or solutions with our code, and in fact we encourage it!
 
-In the spirit of making something really useful for all users of podcasting software we hope that all developers come together and make this a common standard and improved upon it instead of creating incompatibilities.
+In the spirit of making something really useful for all users of podcasting software, we hope that all developers come together and make this a common standard and improved upon it instead of creating incompatibilities.
+MAYBE GET MORE SENTENCES
 
-### Who are we?
+### Who we are
 We are 3 bachelor computer science students from Narvik University College in Norway. We are working on this project as our bachelor thesis. We hope to have a specification ready for implementation in time for our graduation in the beginning of June 2014. We hope this API specification will help solve an issue that in our opinion have plagued and hampered further growth and user adoption of podcasts.
 
 ## Clients
 There are 2 client models intended for use with the API. Hybrid models are also possible. Both streaming and syncing are equal in functionality, however it is recommend implementing as much syncing as possible on your platform. Syncing improves userexperience as the client has a local copy of the library state. This increases the clients speed and enables offline functionality.
 
 ### Synchronizing
-The primary part of creating a syncing client is making sure you have episodes, casts, events, labels and settings stored locally. Synchronisation of events and episodes can be greatly sped up using  since timestamps and correct filtering. As you see new events, and cast changes you will also need to do some local data maintenance like deleting events and episodes as they get deleted or unsubscribed to.
+The primary part of creating a syncing client is making sure you have episodes, casts, events, labels and settings stored locally. Synchronisation of events and episodes can be optimized up using a sinceLast timestamp and correct filtering. As you see new events, and cast changes you will also need to do some local data maintenance like deleting events and episodes as they get deleted or unsubscribed to.
 
-If you take the step up to a fully offline capable client will you also need to manage the related mediafiles locally.
+If you take the step up to a fully offline capable client, you will need to manage the related mediafiles locally.
 ### Streaming
-Streaming clients pull information constantly as it is required. The primary part consists of casts (and labels if you want folders and sorting). And then pulling episodes depending on where the user wants to navigate.
+Streaming clients pull information constantly as required. The first part consists of casts (and labels if you want folders and sorting). And then pulling episodes depending on where the user wants to navigate.
 
 ## Server
 There are some quite essensial server logic in some calls. This relates to how a server should limit the result dependant on inputparameters. This logic will be explain under Calls with a subheading of Server logic for each call.
@@ -72,7 +74,7 @@ curl https:// UrlPath /api/account/login -d username=user -d password=*** -d cli
 <script src="https://gist.github.com/basso/0b84947441aeac8c8c2e.js?file=account-login"></script>
 
 #### UUID
-The UUID is used to identify the client even if the token is expired. This is to reduce the number of duplicate client registrations. The UUID can be a UUID given by the platform or just some random characters (should be 8 characters or more, preferably 256 bit / 32 characters) that is stored for further reference.
+The UUID is used to identify the client even if the token is expired. This is to reduce the number of duplicate client registrations. The UUID can be given by the platform or just some random characters (should be 8 characters or more, preferably 256 bit / 32 characters) that is stored for further reference.
 
 #### Name and description
 The name and description information is used to identify the client to the user. The Name should be a hard coded name of the client, while the description can be something less rigidly defined. It can describe the device it is running on “iPad” or “Windows 7 (x64)”, but the best description would be something that relates to the user, for example “Livingroom media center ” or “Bedroom iPad”.
@@ -90,10 +92,11 @@ curl http:// UrlPath /api/account/ping -H "Authorization:1337EGAh10qpLDq7xDTXG41
 <script src="https://gist.github.com/basso/0b84947441aeac8c8c2e.js?file=account-ping"></script>
 
 #### Server logic
-Check if the token is valid. Theres not much more too it.
+Check if the token is valid.
 
 ### Account/Settings
-There are two types of settings, global for all clients or client specific, these are stored in a json format. A global setting describes a function found in most clients and is common between them. Client specific setting are used for client specific overrides or settings that are unique to your client. In an attempt to find common ground, the following setting names are recommended for their related functionality:
+There are two types of settings, global for all clients or client specific. These are stored in a json format. A global setting describes a function found in most clients and is common among them. Client specific setting are used for client specific overrides or settings that are unique to your client. In an attempt to find common ground, the following setting names are recommended for their related functionality:
+MORE STUFFS CLIENT SYNC WOPDADOPA
 
 <table style="overflow: auto;">
 	<tr>
@@ -170,7 +173,7 @@ curl http:// UrlPath /api/library/casts -H "Authorization:SuperSecretToken"
 <script src="https://gist.github.com/basso/0b84947441aeac8c8c2e.js?file=library-casts"></script>
 
 #### Server logic
-The basic part of this is really straight forward. However there are ways to make this more pain free. The server should make a subscription just a reference between the user and the actual podcast feed. That way, if two users subscribe to the same cast will they both have the same cast id and the episodes will have the same episode ids. This will reduce the amount of urls you will need to crawl.
+The basic part of this is really straight forward. However there are ways to make this more pain free. A subscription should be stored on the server as a reference between the user and the cast. That way, if two users subscribe to the same cast will they both have the same cast id and the episodes will have the same episode ids. This will reduce the amount of urls you will need to crawl.
 
 ### Library/Episodes and Library/Newepisodes
 Both these calls return somewhat similar results. What to use depends on your client model.
