@@ -163,8 +163,7 @@ __Notice:__ Settings names are not a rigid part of the specification, but an att
 The server should only return settings that are not client specific and specific for the current client. This means you will have to filter out the users settings for other clients. The server needs to keep track of what client set settings with client spesific overrides. The client spesific override is applicable to all clients with the same client name string, and is not spesific to the clients UUID. Several instanses of a client can keep their client spesific settings in sync across serveral devices.
 
 ### Library/Casts
-How on earth are you going to get a cast? Pray to god himself?.. well fear not!
-The casts calls handles the the users subscriptions. Each cast has it’s unique ID and the subscriptions is returned in a JSON format. Adding a cast only requires a URL. With the cast ID you can edit and delete a subscription from the library. Also the “hardcore proprietary locked down iTunes user” will be happy that we implemented OPML import and export.
+Casts handles the the users subscriptions. Each cast has its own unique ID and the users subscription list is returned in a JSON format. Adding a cast to the user subscription list only requires an URL. By using the cast ID you can edit and delete a subscription from the library. We have also implemented OPML import and export.
 
 __Example:__
 ```Shell
