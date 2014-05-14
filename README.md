@@ -19,25 +19,25 @@ In the spirit of making something really useful for all users of podcasting soft
 We are 3 bachelor computer science students from Narvik University College in Norway. We are working on this project as our bachelor thesis. We hope to have a specification ready for implementation in time for our graduation in the beginning of June 2014. We hope this API specification will help solve an issue that in our opinion have plagued and hampered further growth and user adoption of podcasts.
 
 ## Clients
-There are 2 client models intended for use with the API. Hybrid models are also possible. Both streaming and syncing are equal in functionality, however it is recommend implementing as much syncing as possible on your platform. Syncing improves userexperience as the client has a local copy of the library state. This increases the clients speed and enables offline functionality.
+There are 2 client models intended for use with the API. Hybrid models are also possible. Both streaming and syncing are equal in functionality, however it is recommend implementing as much syncing functionaity as possible on your platform. Syncing improves userexperience as the client has a local copy of the library state. This increases the clients speed and enables offline functionality.
 
 ### Synchronizing
-The primary part of creating a syncing client is making sure you have episodes, casts, events, labels and settings stored locally. Synchronisation of events and episodes can be optimized up using a sinceLast timestamp and correct filtering. As you see new events, and cast changes you will also need to do some local data maintenance like deleting events and episodes as they get deleted or unsubscribed to.
+The primary part of creating a syncing client is making sure you have `episodes`, `casts`, `events`, `labels` and `settings` stored locally. Synchronisation of `events` and `episodes` can be optimized up using a `since` timestamp and correct filtering. As you see new `events`, and `cast` changes you will also need to do some local data maintenance like deleting `events` and `episodes` as they get deleted or unsubscribed to.
 
 If you take the step up to a fully offline capable client, you will need to manage the related mediafiles locally.
 ### Streaming
-Streaming clients pull information constantly as required. The first part consists of casts (and labels if you want folders and sorting). And then pulling episodes depending on where the user wants to navigate.
+Streaming clients pull information constantly as required. The first part consists of `casts` (and `labels` if you want folders and sorting). And then pulling `episodes` depending on where the user wants to navigate.
 
 ## Server
 There are some quite essensial server logic in some calls. This relates to how a server should limit the result dependant on inputparameters. This logic will be explain under Calls with a subheading of Server logic for each call.
 
 ### Crawling
-Crawling is a really important part of the servers responsibilities. As every client using the Castcloud api for all their podcast fetching, this is a heavy weight on the servers shoulders. The server should rutinely fetch all podcast feeds any user is subscribed too. The server should trottle itself  not to overload any servers delivering podcast feeds. It should also implement optimisations like PubSubHubbub to be as fast as it can. It needs to identify content and give it an episode id without causing duplication. Using the items GUID might mostly work, but writing a good crawler is [a never ending saga](http://inessential.com/2013/03/18/brians_stupid_feed_tricks "Brians stupid feed tricks").
+Crawling is a really important part of the servers responsibilities. As every client using the Castcloud api for all their podcast fetching, this is a heavy weight on the servers shoulders. The server should rutinely fetch all podcast feeds any user is subscribed too. The server should trottle itself  not to overload any servers delivering podcast feeds. It should also implement optimisations like PubSubHubbub to be as fast as it can. It needs to identify content and give it an `episode id` without causing duplication. Using the `items` `GUID` might mostly work, but writing a good crawler is [a never ending saga](http://inessential.com/2013/03/18/brians_stupid_feed_tricks "Brians stupid feed tricks").
 
-You will need to store all channel information in the feed for /library/cast and all data inside each item for the episodes related calls. When storing new episodes in the database after having crawled a feed, should you include the servers time (API server, not the database server) for when it got put in the database. This will be used when clients use the since filter in the /library/newepisodes call.
+You will need to store all `channel` information in the feed for `/library/cast` and all data inside each `item` for the `episodes` related calls. When storing new `episodes` in the database after having crawled a feed, should you include the servers time (API server, not the database server) for when it got put in the database. This will be used when clients use the `since` filter in the `/library/newepisodes` call.
 
 ## Calls
-This document will attempt to explain proper usage of the api. All functions are explained in an interactive documentation called swagger. This can be viewed at http://api.castcloud.org/utils/swagger-ui/ or on your own server instance after having recompiled the swagger documentation.
+This document will attempt to explain proper usage of the api. All functions are explained in an interactive documentation called swagger. This can be viewed at http://api.castcloud.org/utils/swagger-ui/ or run on your own server instance after having recompiled the swagger documentation.
 
 To recompile the swagger documentation:
 ```Shell
@@ -47,7 +47,7 @@ cd /your/castcloud/directory/
 __Notice:__ When sending pull requests. Make sure you have kept http://api.castcloud.org/api as basepath.
 
 ### XML to JSON conversion
-Some data returned from the server has been parsed from xml to json. This is mostly straight forward with one exception of tags having both  attributes and content inside itself. In these cases the content inside the tag gets put in a field named “_”.
+Some data returned from the server has been parsed from xml to json. This is mostly straight forward with one exception of tags having both attributes and content inside itself. In these cases the content inside the tag gets put in a field named “_”.
 
 Example:
 ```XML
@@ -63,9 +63,9 @@ becomes
 
 
 ### Account/Login
-This call registers the client to the user and returns the client authorization token. The authorization token is used for all other requests. UUID, name and description fields are vitally important as these are used actively. 
+This call registers the client to the user and returns the client authorization token. The authorization token is used for all other requests. `UUID`, `name` and `description` fields are vitally important as these are used actively. 
 
-The UUID is the only thing that is intended to be kept after a user explicitly signs out.
+The `UUID` is the only thing that is intended to be kept after a user explicitly signs out.
 
 __Example:__
 ```Shell
@@ -74,13 +74,13 @@ curl https:// UrlPath /api/account/login -d username=user -d password=*** -d cli
 <script src="https://gist.github.com/basso/0b84947441aeac8c8c2e.js?file=account-login"></script>
 
 #### UUID
-The UUID is used to identify the client even if the token is expired. This is to reduce the number of duplicate client registrations. The UUID can be given by the platform or just some random characters (should be 8 characters or more, preferably 256 bit / 32 characters) that is stored for further reference.
+The `UUID` is used to identify the client even if the token is expired. This is to reduce the number of duplicate client registrations. The UUID can be given by the platform or just some random characters (should be 8 characters or more, preferably 256 bit / 32 characters) that is stored for further reference.
 
 #### Name and description
-The name and description information is used to identify the client to the user. The Name should be a hard coded name of the client, while the description can be something less rigidly defined. It can describe the device it is running on “iPad” or “Windows 7 (x64)”, but the best description would be something that relates to the user, for example “Livingroom media center ” or “Bedroom iPad”.
+The `name` and `description` information is used to identify the client to the user. The `name` should be hard coded into the client and not change with versioning or platforms (unless features vary). `description` can be something less rigidly defined. It can describe the device it is running on “iPad” or “Windows 7 (x64)”, but the best `description` would be something that relates to the user, for example “Livingroom media center” or “Bedroom iPad”.
 
 #### Server logic
-When a user logs in through the API, the client calling the server provides a lot of information. Some information should be used to simplefy backend management, and a tiny bit if it is exposed though the API. Information exposed through the API is the clients name and description. Also keep track of the UUID as this should be used for preventing duplicate client registrations. This in turn simplefies the users backend management. 
+When a user logs in through the API, the client calling the server provides a lot of information. Some information should be used to simplefy backend management, and a tiny bit if it is exposed though the API. Information exposed through the API is the clients `name` and `description`. Also keep track of the `UUID` as this should be used for preventing duplicate client registrations. This in turn simplefies the users backend management. 
 
 ### Account/Ping
 This can be used to check if the token is good.
@@ -95,7 +95,7 @@ curl http:// UrlPath /api/account/ping -H "Authorization:1337EGAh10qpLDq7xDTXG41
 Check if the token is valid.
 
 ### Account/Settings
-There are two types of settings, global for all clients or client specific. These are stored in a json format. A global setting describes a function found in most clients and is common among them. Client specific setting are used for client specific overrides or settings that are unique to your client. In an attempt to find common ground, the following setting names are recommended for their related functionality:
+There are two types of `settings`, global for all clients or client specific. These are stored in a json format. A global setting describes a function found in most clients and is common among them. Client specific setting are used for client specific overrides or settings that are unique to your client. In an attempt to find common ground, the following setting names are recommended for their related functionality:
 <!-- MORE STUFFS CLIENT SYNC WOPDADOPA -->
 
 <table style="overflow: auto;">
@@ -157,13 +157,13 @@ There are two types of settings, global for all clients or client specific. Thes
 	</tr>
 </table>
 
-__Notice:__ Settings names are not a rigid part of the specification, but an attempt to find common ground. This list will be modified as per developer adoption unrelated of api versioning to improve developers common ground.
+__Notice:__ `Setting keys` are not a rigid part of the specification, but an attempt to find common ground. This list will be modified as per developer adoption unrelated of api versioning to improve developers common ground.
 
 #### Server logic
-The server should only return settings that are not client specific and specific for the current client. This means you will have to filter out the users settings for other clients. The server needs to keep track of what client set settings with client spesific overrides. The client spesific override is applicable to all clients with the same client name string, and is not spesific to the clients UUID. Several instanses of a client can keep their client spesific settings in sync across serveral devices.
+The server should only return `settings` that are not client specific and specific for the current client. This means you will have to filter out the users `settings` for other clients. The server needs to keep track of what client set `settings` with client spesific overrides. The client spesific override is applicable to all clients with the same client name string, and is not spesific to the clients `UUID`. Several instanses of a client can keep their client spesific settings in sync across serveral devices.
 
 ### Library/Casts
-Casts handles the the users subscriptions. Each cast has its own unique ID and the users subscription list is returned in a JSON format. Adding a cast to the user subscription list only requires an URL. By using the cast ID you can edit and delete a subscription from the library. We have also implemented OPML import and export.
+Casts handles the the users subscriptions. Each cast has its own unique `cast id` and the users subscription list is returned in a JSON format. Adding a cast to the user subscription list only requires an `URL`. By using the `cast id` you can edit and delete a subscription from the library. We have also implemented OPML import and export.
 
 __Example:__
 ```Shell
@@ -172,7 +172,7 @@ curl http:// UrlPath /api/library/casts -H "Authorization:SuperSecretToken"
 <script src="https://gist.github.com/basso/0b84947441aeac8c8c2e.js?file=library-casts"></script>
 
 #### Server logic
-The basic part of this is really straight forward. However there are ways to make this more pain free. A subscription should be stored on the server as a reference between the user and the cast. That way, if two users subscribe to the same cast will they both have the same cast id and the episodes will have the same episode ids. This will reduce the amount of urls you will need to crawl.
+The basic part of this is really straight forward. However there are ways to make this more pain free. A subscription should be stored on the server as a reference between the user and the cast. That way, if two users subscribe to the same cast will they both have the same `cast id` and the episodes will have the same `episode ids`. This will reduce the amount of urls you will need to crawl.
 
 ### Library/Episodes and Library/Newepisodes
 Both these calls return somewhat similar results. What to use depends on your client model.
@@ -188,11 +188,11 @@ curl https:// UrlPath /api/library/newepisodes -H "Authorization:SuperSecretToke
 <script src="https://gist.github.com/basso/0b84947441aeac8c8c2e.js?file=library-episodes"></script>
 
 #### Syncing model (Library/Newepisodes)
-If you are using a syncing client model we recommend newepisodes as you can get episodes for all feeds with 1 call. In addition you can save a lot of data transfer when using the since parameter. When providing a since parameter, please use the timestamp included with the last result, and not one from the client side as these might differ.
+If you are using a syncing client model we recommend `newepisodes` as you can get episodes for all feeds with 1 call. In addition you can save a lot of data transfer when using the `since` parameter. When providing a `since` parameter, please use the `timestamp` included with the last result, and not one from the client side as these might differ.
 
-Please note that using a syncing model will force you to get events from /library/events as the lastevent included with each episode will quickly get outdated. If you see a new event for an episode that you do not have received from newepisodes or you do not have locally, this means the user has undeleted the episode. Retrieve it with /library/episode/{episodeid}.
+Please note that using a syncing model will force you to get events from `/library/events` as the `lastevent` included with each `episode` will quickly get outdated. If you see a new `event` for an `episode` that you do not have received from newepisodes or you do not have locally, this means the user has undeleted the `episode`. Retrieve it with `/library/episode/{episodeid}`.
 
-If the user wants to see all episodes of a podcast (included deleted) use the /library/episodes/{castid} with “” as a filter. With this information the user will be able to reset playback status (undelete) for the casts episodes. Clients undeletes episodes with sending a new start event (type 10).
+If the user wants to see all `episodes` of a podcast (included deleted) use the `/library/episodes/{castid}` with "" as a filter. With this information the user will be able to reset playback status (undelete) for the casts episodes. Clients undeletes episodes with sending a new start event (type 10).
 
 #### Streaming model (Library/Episodes)
 If you are using a streaming model all you will need to use is /library/episodes. Before you call it however you need have the information from /library/casts or library/labels as cast id or label id is a required parameter.
@@ -200,7 +200,7 @@ If you are using a streaming model all you will need to use is /library/episodes
 #### Server logic
 /library/episodes, /library/episode and /library/newepisodes all return episodes in the same format. The biggest difference are the filters defined in input parameters. /library/newepisodes must also include a timestamp of when it was generated. The “feed” in each episode is a json representation of the xml.
 
-Since filter in /library/newepisode. The call should filter to only return episodes stored after this time.
+`since` filter in /library/newepisode. The call should filter to only return episodes stored after this time.
 
 Episodeid filter in /library/episode.Required parameter, should show error if not provided. The call should only return the one episode with the specified episode id.
 
@@ -261,7 +261,7 @@ curl https:// UrlPath /api/library/events -H "Authorization:SuperSecretToken"
 <script src="https://gist.github.com/basso/0b84947441aeac8c8c2e.js?file=library-events"></script>
 
 #### Server logic
-Since filter. The call should filter to only return events received/stored after this time.
+`since` filter. The call should filter to only return events received/stored after this time.
 
 Episodeid filter. The call should only return events for the specified episode.
 
