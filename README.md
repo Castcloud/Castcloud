@@ -19,6 +19,9 @@ In the spirit of making something really useful for all users of podcasting soft
 We are 3 bachelor computer science students from Narvik University College in Norway. We are working on this project as our bachelor thesis. We hope to have a specification ready for implementation in time for our graduation in the beginning of June 2014. We hope this API specification will help solve an issue that in our opinion have plagued and hampered further growth and user adoption of podcasts.
 
 ## Clients
+<!-- ugh, this is bad. MORE -->
+A client in this specsification is a peace of software run by a user on any compatible platform. A client is identified by their name. There is no enity making sure developers get thir own name, so. A client is identified by their client name. This means that if a developer make "X Podcaster" for more than 1 platform will the client be identified as the same client software of the have the same client name.
+
 There are 2 client models intended for use with the API. Hybrid models are also possible. Both streaming and syncing are equal in functionality, however it is recommend implementing as much syncing functionaity as possible on your platform. Syncing improves userexperience as the client has a local copy of the library state. This increases the clients speed and enables offline functionality.
 
 ### Synchronizing
@@ -192,26 +195,26 @@ If you are using a syncing client model we recommend `newepisodes` as you can ge
 
 Please note that using a syncing model will force you to get events from `/library/events` as the `lastevent` included with each `episode` will quickly get outdated. If you see a new `event` for an `episode` that you do not have received from newepisodes or you do not have locally, this means the user has undeleted the `episode`. Retrieve it with `/library/episode/{episodeid}`.
 
-If the user wants to see all `episodes` of a podcast (included deleted) use the `/library/episodes/{castid}` with "" as a filter. With this information the user will be able to reset playback status (undelete) for the casts episodes. Clients undeletes episodes with sending a new start event (type 10).
+If the user wants to see all `episodes` of a podcast (included deleted) use the `/library/episodes/{castid}` with "" as a filter. With this information the user will be able to reset playback status (undelete) for the `casts` `episodes`. Clients undeletes `episodes` with sending a new start event (type 10).
 
 #### Streaming model (Library/Episodes)
-If you are using a streaming model all you will need to use is /library/episodes. Before you call it however you need have the information from /library/casts or library/labels as cast id or label id is a required parameter.
+If you are using a streaming model all you will need to use is /library/episodes. Before you call it however you need have the information from `/library/casts` or `/library/labels` as `cast id` or `label id` is a required parameter.
 
 #### Server logic
-/library/episodes, /library/episode and /library/newepisodes all return episodes in the same format. The biggest difference are the filters defined in input parameters. /library/newepisodes must also include a timestamp of when it was generated. The “feed” in each episode is a json representation of the xml.
+`/library/episodes`, `/library/episode` and `/library/newepisodes` all return `episodes` in the same format. The biggest difference are the filters defined in input parameters. `/library/newepisodes` must also include a timestamp of when it was generated. The `feed` in each `episode` is a json representation of `items` xml.
 
-`since` filter in /library/newepisode. The call should filter to only return episodes stored after this time.
+`since` filter in `/library/newepisode`. The call should filter to only return episodes stored after this time.
 
-Episodeid filter in /library/episode.Required parameter, should show error if not provided. The call should only return the one episode with the specified episode id.
+`episode id` filter in `/library/episode`. Required parameter, should show error if not provided. The call should only return the one episode with the specified episode id.
 
-Castid filter in /library/episodes. Required parameter, should show error if not provided. The call should only return episodes for the casts with the specified cast id.
+`cast id` filter in `/library/episodes`. Required parameter, should show error if not provided. The call should only return episodes for the casts with the specified cast id.
 
-Labelid filter in /library/episodes. Required parameter, should show error if not provided. The call should only return episodes for casts inside the specified label.
+`label id` filter in `/library/episodes`. Required parameter, should show error if not provided. The call should only return episodes for casts inside the specified label.
 
-Exclude filter in /library/episodes and /library/episodes/label. The call should only return episodes where the episodes last event is not one of the listed types. If no exclude parameter is provided should the server use a default filter of “70” (deleted). If the parameter is empty (“”) should no episodes be excluded.
+Exclude filter in `/library/episodes` and `/library/episodes/label`. The call should only return `episodes` where the `episodes` `lastevent` is not one of the listed types. If no exclude parameter is provided should the server use a default filter of “70” (deleted). If the parameter is empty (“”) should no `episodes` be excluded.
 
 ### Library/Events
-Events are how the Castcloud API keeps track of the users playback  progression. They relate to common actions performed on the client.
+`events` are how the clients keeps track of the users playback progression. They relate to common actions performed on the client.
 
 <table>
 	<tr>
@@ -232,7 +235,7 @@ Events are how the Castcloud API keeps track of the users playback  progression.
 	</tr>
 	<tr>
 		<td>40</td>
-		<td>Sleeptimer start. This indicates where a sleeptimer was initiated. Concurrentorder must be 1 less than the concurrentorder for the Sleeptimer end event..</td>
+		<td>Sleeptimer start. This indicates where a sleeptimer was initiated. Concurrentorder must be 1 less than the concurrentorder for the Sleeptimer end event.</td>
 	</tr>
 	<tr>
 		<td>50</td>
@@ -248,7 +251,7 @@ Events are how the Castcloud API keeps track of the users playback  progression.
 	</tr>
 </table>
 
-More complex events are built up of combinations of events. If a users skips from one position to another, the client should then send 2 events with the same ClientTS. The first event should be a pause event with a concurrentorder of 0. The second event should be a play event with the new player position and a concurrentorder of 1.
+More complex `events` are built up of combinations of `events`. If a users skips from one position to another, the client should then send 2 events with the same `ClientTS`. The first event should be a pause event with a concurrentorder of 0. The second event should be a play event with the new player position and a concurrentorder of 1.
 
 Clients following a streaming model might not need to fetch events, as the most recent event is included when getting episodes. Some clients might offer the ability to show a list of the users events. This might better help the user find back to where they last were.Streaming model clients that offers a complete eventlist should use the cast id to speed up the request. If your syncing model client does not offer this functionality, you don’t need to store more than the last event for each episode.
 
@@ -263,9 +266,9 @@ curl https:// UrlPath /api/library/events -H "Authorization:SuperSecretToken"
 #### Server logic
 `since` filter. The call should filter to only return events received/stored after this time.
 
-Episodeid filter. The call should only return events for the specified episode.
+`episode id` filter. The call should only return `events` for the specified `episode`.
 
-Exclude filter. The call should only return events where the episodes last event is not one of the listed types. If no exclude parameter is provided should the server use a default filter of “70” (deleted). To completely disable the exclude filter submit the parameter but leave it empty (“”).
+`exclude` filter. The call should only return `events` where the `episodes` last `event` is not one of the listed `types`. If no exclude parameter is provided should the server use a default filter of “70” (deleted). To completely disable the exclude filter submit the parameter but leave it empty (“”).
 
 ### Library/Labels
 With labels you group and sort your subscriptions in clients.
@@ -277,7 +280,7 @@ curl https:// UrlPath /api/library/labels -H "Authorization:SuperSecretToken"
 <script src="https://gist.github.com/basso/0b84947441aeac8c8c2e.js?file=library-labels"></script>
 
 #### Server logic
-The most important part of this call in making sure the output is clean and valid. Therefor the output should be validated every time before it gets sent to a client. Clients should not have change the labels when they unsubscriobe from a podcast or subscribe to a new one. As defaut all casts and labels should be added to the root label. A cast does not have to be in root when it is inside another label. You might be interested in the function clean_Labels() inside db.php if you are trying to ensure clean labels.
+The most important part of this call in making sure the output is clean and valid. Therefor the output should be validated every time before it gets sent to a client. Clients should not have change the `labels` when they unsubscriobe from a podcast or subscribe to a new one. As defaut all `casts` and `labels` should be added to the root `label`. A `cast` does not have to be in root when it is inside another `label`. You might be interested in the function `clean_Labels()` inside `api/db.php` if you are trying to ensure clean `labels`.
 
 <style>
 .gist-data { max-height: 400px; overflow: auto; } 
