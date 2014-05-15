@@ -7,7 +7,7 @@ Castcloud is a RESTful API specifying how podcast clients can communicate a user
 The server side of the API provides centralized metadata storage for making personal podcast libraries available to multiple clients. The metadata of the library includes subscriptions, episodes, playback status and settings. The server side takes care of feedcrawling so that clients doesn't have to individually crawl all the users feeds. This improves speed and simplefies some of the clients work.
 
 ### Reference implementations
-We have made reference implementations of both server and client. The server implements all server side functionality and the client uses a syncing model as far as possible for modern browsers (offline media storage is currently problematic).
+We have made reference implementations of both server and client. The referance server implementation has all server side functionality and the referance client uses a syncing model as far as possible for modern browsers (offline media storage is currently problematic), and falls back to streaming when syncing is impossible.
 
 ### License
 All code is GPLv3 with some included utilities and libraries being Apache 2.0 and MIT License. This means you are free to make commercial software or solutions with our code, and in fact we encourage it!
@@ -20,7 +20,7 @@ We are 3 bachelor computer science students from Narvik University College in No
 
 ## Clients
 <!-- ugh, this is bad. MORE -->
-A client in this specsification is a peace of software run by a user on any compatible platform. A client is identified by their name. There is no enity making sure developers get thir own name, so. A client is identified by their client name. This means that if a developer make "X Podcaster" for more than 1 platform will the client be identified as the same client software of the have the same client name.
+A client in this specsification is a piece of software run by a user on any compatible platform. A client is identified by its name, regardless of developer or platform.
 
 There are 2 client models intended for use with the API. Hybrid models are also possible. Both streaming and syncing are equal in functionality, however it is recommend implementing as much syncing functionaity as possible on your platform. Syncing improves userexperience as the client has a local copy of the library state. This increases the clients speed and enables offline functionality.
 
