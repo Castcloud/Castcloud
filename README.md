@@ -19,22 +19,25 @@ In the spirit of making something really useful for all users of podcasting soft
 We are 3 bachelor computer science students from Narvik University College in Norway. We are working on this project as our bachelor thesis. We hope to have a specification ready for implementation in time for our graduation in the beginning of June 2014. We hope this API specification will help solve an issue that in our opinion have plagued and hampered further growth and user adoption of podcasts.
 
 ## Clients
-<!-- ugh, this is bad. MORE -->
-A client in this specsification is a piece of software run by a user on any compatible platform. A client is identified by its name, regardless of developer or platform.
+A client in this documentation is a piece of software run by a user on any compatible platform. A client is identified by its name, regardless of developer or platform. Different instanses of a client is identified by a `UUID` or `token` to the server, and by its client `decription` to users.
 
-There are 2 client models intended for use with the API. Hybrid models are also possible. Both streaming and syncing are equal in functionality, however it is recommend implementing as much syncing functionaity as possible on your platform. Syncing improves userexperience as the client has a local copy of the library state. This increases the clients speed and enables offline functionality.
+There are 2 client models intended for use with the API. Hybrid models are also possible. Both streaming and syncing are equal in functionality, however it is recommend implementing as much syncing functionaity as possible on the clients platform. Syncing improves userexperience as the client has a local copy of the library state. This increases the clients speed and enables offline functionality.
 
 ### Synchronizing
-The primary part of creating a syncing client is making sure you have `episodes`, `casts`, `events`, `labels` and `settings` stored locally. Synchronisation of `events` and `episodes` can be optimized up using a `since` timestamp and correct filtering. As you see new `events`, and `cast` changes you will also need to do some local data maintenance like deleting `events` and `episodes` as they get deleted or unsubscribed to.
+The primary part of creating a syncing client is making sure you have `episodes`, `casts`, `events`, `labels` and `settings` stored locally. Fetching of `events` and `episodes` can be accelerated using a `since` timestamp and correct filtering. Clients will have to remove episodes from its library when it gets delete `events` (or End of track `events` depending on `settings`) or a `cast`gets removed (unsubscribed to).
 
-If you take the step up to a fully offline capable client, you will need to manage the related mediafiles locally.
+To be fully offline capable, the client needs manage the related mediafiles locally.
 ### Streaming
-Streaming clients pull information constantly as required. The first part consists of `casts` (and `labels` if you want folders and sorting). And then pulling `episodes` depending on where the user wants to navigate.
+Streaming clients fetch information as required. The first part consists of `casts` (and `labels` if the client implements folders and sorting). After letting the user select a `cast` or `label` can the client then fetch the related `episodes`.
 
 ## Server
-There are some quite essensial server logic in some calls. This relates to how a server should limit the result dependant on inputparameters. This logic will be explain under Calls with a subheading of Server logic for each call.
+A server in this documentation is a piece of software runing on a network capable device. It respondes to REST request in the pattern described in this documentation. It handles permanent storage of information and information gathering from podcast feeds.
+
+Most of the data posessing is moved server side to simplify client implementation. This documentation will attempt to explain some of the required data prossesing to ease implementation. The explenation is located under the heading "Server logic" for each of the different calls.
 
 ### Crawling
+It is essensial that the server implements crawling correcly. All clients using the server relies on it to have fetched the needed feed infomation. If this was to stop would all clients stop working. The server should be a responsible crawler, propperly identifying itself with a propper useragent.
+
 Crawling is a really important part of the servers responsibilities. As every client using the Castcloud api for all their podcast fetching, this is a heavy weight on the servers shoulders. The server should rutinely fetch all podcast feeds any user is subscribed too. The server should trottle itself  not to overload any servers delivering podcast feeds. It should also implement optimisations like PubSubHubbub to be as fast as it can. It needs to identify content and give it an `episode id` without causing duplication. Using the `items` `GUID` might mostly work, but writing a good crawler is [a never ending saga](http://inessential.com/2013/03/18/brians_stupid_feed_tricks "Brians stupid feed tricks").
 
 You will need to store all `channel` information in the feed for `/library/cast` and all data inside each `item` for the `episodes` related calls. When storing new `episodes` in the database after having crawled a feed, should you include the servers time (API server, not the database server) for when it got put in the database. This will be used when clients use the `since` filter in the `/library/newepisodes` call.
