@@ -98,12 +98,12 @@ curl http:// UrlPath /api/account/ping -H "Authorization:1337EGAh10qpLDq7xDTXG41
 Check if the token is valid.
 
 ### Account/Settings
-There are two types of `settings`, user settings and client spesific overrides. User settings are shared between all clients, while client spesific settings are shared between clients with the same name. User spesific settings are intended for common settings with common configurations. If a client allow a broader (uncommon settings values) or narrower (the client does not understand the current setting value) configuraiton should clientspesific overrides be used. A user might use a spesific client in a different way than teir other clients, and might want to configure a client differently than the rest. In these cases clients should offer the abillety for users to toggle client spesific overrides of settings so that these settings don't propagate to other clients.
+There are two types of `settings`, user settings and client spesific overrides. User settings are shared between all the users clients, while client spesific settings are shared between clients with the same name. User spesific settings are intended for common settings with common configurations. If a client allow a broader (uncommon settings values) or narrower (the client does not understand the current setting value) configuraiton should clientspesific overrides be used. A user might use a spesific client in a different way than teir other clients, and might want to configure a client differently than the rest. In these cases clients should offer the abillety for users to toggle client spesific overrides of settings so that these settings don't propagate to other clients. When a setting that is client spesific gets untoggled from client spesificness should the client ask if the user want to keep the user specific value or overwite it with the current client spesific value.
 
- The server side does not change its behaviur depending on settings, it merly is storing them. It is up to the client to implement their functionality.
+Clients needs to bring their own set of `settings` with client recomended defaults. If setting does not exsist should the client set and use its default. A client should not overwrite the users settings with it's defaults unless the user asks for it. If a current settings value is not understood should the client set it's default as a client spesicific setting and use it. The server side does not change its behaviur depending on settings, it merly is storing them. It is up to the client to implement the settings functionality.
 
- describes a function found in most clients and is common among them. Client specific setting are used for client specific overrides or settings that are unique to the client. In an attempt to find common ground, the following setting names are recommended for their related functionality:
-<!-- MORE STUFFS CLIENT SYNC WOPDADOPA -->
+We hope that developers can come togeather and create a common list of Setting keys and values. Therefor we suggest using these keys and values when implementing settings for related functionality in clients:
+<!-- MORE, til review -->
 
 <table style="overflow: auto;">
 	<tr>
