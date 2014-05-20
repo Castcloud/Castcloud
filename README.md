@@ -160,19 +160,18 @@ We hope that developers can come together and create a common list of `setting k
 	<tr>
 		<td>sync/autodelete</td>
 		<td>false</td>
-		<td>Stringformated boolean. Should clients automaticly send a delete event along the EOT event when the end is reached.<br/>
-<b>Notice:</b> It is likely this might change from being a boolean to something with more details.<br/>
-<b>Warning:</b> If you implement this you might have to clean up by sending delete events for clients that does not implement this.</td>
+		<td>Stringformated boolean. If true clients can autodelete podcasts with EOT events. Default `exclude` parameter for episode and event related calls should be "60,70".<br/>
+<b>Notice:</b> It is likely this might change from being a boolean to something with more details.</td>
 	</tr>
 </table>
 
-__Notice:__ `Setting keys` are not a rigid part of the specification, but an attempt to find common ground. This list will be modified as per developer adoption unrelated of api versioning to improve developers common ground.
+__Notice:__ `Setting keys` are not a rigid part of the specification, but an attempt to find common ground. This list will be modified as per developer adoption unrelated of api versioning to set a common ground.
 
 #### Server logic
-The server should only return `settings` that are not client specific and specific for the current client. This means the server will have to filter out the users `settings` for other clients. The server needs to keep track of what client set `settings` with client spesific overrides. The client spesific override is applicable to all clients with the same client name string, and is not spesific to the clients `UUID`. Several instanses of a client can keep their client spesific settings in sync across serveral devices.
+The server should send all the users global `settings` and all `settings` with `clientspesific` overrides for the active client. The server needs to keep track of what client set `settings` with `clientspesific` overrides. The `clientspesific` override is applicable to all clients with the same client name string, and is not spesific to the clients `UUID` or `token`. Several instanses of a client can keep their `clientspesific` `settings` in sync across serveral devices.
 
 ### Library/Casts
-Casts handles the the users subscriptions. Each cast has its own unique `cast id` and the users subscription list is returned in a JSON format. Adding a cast to the user subscription list only requires an `URL`. By using the `cast id` the client can edit and delete a subscription from the library. It is also possible to import and export casts via opml.
+`casts` handles the the users subscriptions. Each `cast` has its own unique `cast id`. Adding a cast to the user subscription list only requires an `URL`. By using the `cast id` the client can edit and delete a subscription from the library. It is also possible to import and export casts via opml.
 
 __Example:__
 ```Shell
@@ -181,7 +180,7 @@ curl http:// UrlPath /api/library/casts -H "Authorization:SuperSecretToken"
 <script src="https://gist.github.com/basso/0b84947441aeac8c8c2e.js?file=library-casts"></script>
 
 #### Server logic
-The basic part of this is really straight forward. However there are ways to make this more pain free. A subscription should be stored on the server as a reference between the user and the cast. That way, if two users subscribe to the same cast will they both have the same `cast id` and the episodes will have the same `episode ids`. This will reduce the amount of urls the server will need to crawl.
+A subscription should be stored on the server as a reference between the user and the cast. That way, if two users subscribe to the same cast will they both have the same `cast id` and the episodes will have the same `episode ids`. This will reduce the amount of urls the server will need to crawl. `casts.opml` are also the only parts of the api that uses xml. Make sure you maintain the propper label structure when you export the opml, and validate it with a validation tool. Importing to iTunes can also be a good test. When importing opmls, make sure you maintain propper label stucture. Remeber that labels should only be one layer deep, so you might have to flatten it. Importing a large opml from a feedreader like bazqux.com might be a good choice. Do not forget to crawl the imported opmls.
 
 ### Library/Episodes and Library/Newepisodes
 Both these calls return somewhat similar results. What to use depends on the client model.
@@ -199,15 +198,15 @@ curl https:// UrlPath /api/library/newepisodes -H "Authorization:SuperSecretToke
 #### Syncing model (Library/Newepisodes)
 If the client is using a syncing client model we recommend using `newepisodes` and related calls as you can get episodes for all feeds with 1 call. In addition you can save a lot of data transfer when using the `since` parameter. When providing a `since` parameter, please use the `timestamp` included with the last result, and not one from the client side as these might differ.
 
-Please note that using a syncing model will force you to get events from `/library/events` as the `lastevent` included with each `episode` will quickly get outdated. If you see a new `event` for an `episode` that you do not have received from newepisodes or you do not have locally, this means the user has undeleted the `episode`. Retrieve it with `/library/episode/{episodeid}`.
+Please note that using a syncing model will force you to get events from `/library/events` as the `lastevent` included with each `episode` will quickly get outdated. If you see a new `event` for an `episode` that you don't have locally, this means the user has undeleted the `episode`. Retrieve it with `/library/episode/{episodeid}`.
 
-If the user wants to see all `episodes` of a podcast (included deleted) use the `/library/episodes/{castid}` with "" as a filter. With this information the user will be able to reset playback status (undelete) for the `casts` `episodes`. Clients undeletes `episodes` with sending a new start event (type 10).
+If the user wants to see all `episodes` of a podcast (included deleted) use the `/library/episodes/{castid}` with "" as a filter. With this information the user will be able to reset playback status (undelete) for the `casts` `episodes`. Clients undeletes `episodes` with sending a new start event (type 10). Most syncing client should implement this as a online only feature.
 
 #### Streaming model (Library/Episodes)
-If you are using a streaming model all you will need to use is /library/episodes. Before you call it however you need have the information from `/library/casts` or `/library/labels` as `cast id` or `label id` is a required parameter.
+If you are using a streaming model all you will need to use is `/library/episodes`. Before you can call it however you need have the information from `/library/casts` or `/library/labels` as `cast id` or `label id` is a required parameter.
 
 #### Server logic
-`/library/episodes`, `/library/episode` and `/library/newepisodes` all return `episodes` in the same format. The biggest difference are the filters defined in input parameters. `/library/newepisodes` must also include a timestamp of when it was generated. The `feed` in each `episode` is a json representation of `items` xml.
+`/library/episodes`, `/library/episode` and `/library/newepisodes` all return `episodes` in the same format. The biggest difference are the filters defined in input parameters. `/library/newepisodes` must also include a timestamp of when it was generated. The `feed` in each `episode` is a json representation of `items` xml. `/library/episode` only returns 1 episode at the time, please note that this should be inside a list of episodes.
 
 `since` filter in `/library/newepisode`. The call should filter to only return episodes stored after this time.
 
