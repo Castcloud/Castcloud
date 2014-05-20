@@ -105,6 +105,8 @@ Clients needs to bring their own set of supported `settings` and `values` with c
 Clients are not required to show any UI for configuring a setting. If some information about the clients state is required to save, `settings` with `clientspesific` overrides might be a good place to put it.
 
 We hope that developers can come together and create a common list of `setting keys` and `values`. Therefor we suggest using these keys and `values` when implementing settings for related functionality in clients:
+
+Changes to `settings` should be sent to the server as fast as possible. It is recomended that clients keep an output buffer of these changes as they occur, then retry sending them until they successfully gets sent.
 <!-- MORE, til review -->
 
 <table style="overflow: auto;">
@@ -171,7 +173,9 @@ __Notice:__ `Setting keys` are not a rigid part of the specification, but an att
 The server should send all the users global `settings` and all `settings` with `clientspesific` overrides for the active client. The server needs to keep track of what client set `settings` with `clientspesific` overrides. The `clientspesific` override is applicable to all clients with the same client name string, and is not spesific to the clients `UUID` or `token`. Several instanses of a client can keep their `clientspesific` `settings` in sync across serveral devices.
 
 ### Library/Casts
-`casts` handles the the users subscriptions. Each `cast` has its own unique `cast id`. Adding a cast to the user subscription list only requires an `URL`. By using the `cast id` the client can edit and delete a subscription from the library. It is also possible to import and export casts via opml.
+`casts` is the the users subscriptions. Each `cast` has its own unique `cast id`. Adding a cast to the user subscription list only requires a `URL` of a valid podcast feed. By using the `cast id` the client can edit and delete a subscription from the library. It is also possible to import and export casts via opml.
+
+Changes to `casts` should be sent to the server as fast as possible. It is recomended that clients keep an output buffer of these changes as they occur, then retry sending them until they successfully gets sent.
 
 __Example:__
 ```Shell
@@ -180,7 +184,7 @@ curl http:// UrlPath /api/library/casts -H "Authorization:SuperSecretToken"
 <script src="https://gist.github.com/basso/0b84947441aeac8c8c2e.js?file=library-casts"></script>
 
 #### Server logic
-A subscription should be stored on the server as a reference between the user and the cast. That way, if two users subscribe to the same cast will they both have the same `cast id` and the episodes will have the same `episode ids`. This will reduce the amount of urls the server will need to crawl. `casts.opml` are also the only parts of the api that uses xml. Make sure you maintain the propper label structure when you export the opml, and validate it with a validation tool. Importing to iTunes can also be a good test. When importing opmls, make sure you maintain propper label stucture. Remeber that labels should only be one layer deep, so you might have to flatten it. Importing a large opml from a feedreader like bazqux.com might be a good choice. Do not forget to crawl the imported opmls.
+A subscription should be stored on the server as a reference between the user and the cast. That way, if two users subscribe to the same cast will they both have the same `cast id` and the episodes will have the same `episode ids`. This will reduce the amount of feeds the server will need to crawl. `casts.opml` are the only parts of the api that uses xml. Make sure you maintain the propper label structure when you export the opml, and validate it with a validation tool. Importing to iTunes can also be a good test. When importing opmls, make sure you maintain propper label stucture. Remeber that labels should only be one layer deep, so you might have to flatten it. Importing a large opml from a feedreader like bazqux.com might be a good choice. Do not forget to crawl the imported opmls.
 
 ### Library/Episodes and Library/Newepisodes
 Both these calls return somewhat similar results. What to use depends on the client model.
@@ -206,17 +210,17 @@ If the user wants to see all `episodes` of a podcast (included deleted) use the 
 If you are using a streaming model all you will need to use is `/library/episodes`. Before you can call it however you need have the information from `/library/casts` or `/library/labels` as `cast id` or `label id` is a required parameter.
 
 #### Server logic
-`/library/episodes`, `/library/episode` and `/library/newepisodes` all return `episodes` in the same format. The biggest difference are the filters defined in input parameters. `/library/newepisodes` must also include a timestamp of when it was generated. The `feed` in each `episode` is a json representation of `items` xml. `/library/episode` only returns 1 episode at the time, please note that this should be inside a list of episodes.
+`/library/episodes`, `/library/episode` and `/library/newepisodes` all return `episodes` in the same format. The biggest difference are the filters defined in input parameters. `/library/newepisodes` must also include a timestamp of when it was generated. The `feed` in each `episode` is a json representation of `items` xml. `/library/episode` only returns 1 episode at the time, please note that this should not be inside a list of episodes.
 
 `since` filter in `/library/newepisode`. The call should filter to only return episodes stored after this time.
 
 `episode id` filter in `/library/episode`. Required parameter, should show error if not provided. The call should only return the one episode with the specified episode id.
 
-`cast id` filter in `/library/episodes`. Required parameter, should show error if not provided. The call should only return episodes for the casts with the specified cast id.
+`cast id` filter in `/library/episodes`. Required parameter, should show error if not provided. The call should only return episodes for the casts with the specified `cast id`.
 
-`label id` filter in `/library/episodes`. Required parameter, should show error if not provided. The call should only return episodes for casts inside the specified label.
+`label id` filter in `/library/episodes/label`. Required parameter, should show error if not provided. The call should only return episodes for casts inside the specified label.
 
-Exclude filter in `/library/episodes` and `/library/episodes/label`. The call should only return `episodes` where the `episodes` `lastevent` is not one of the listed types. If no exclude parameter is provided should the server use a default filter of “70” (deleted). If the parameter is empty (“”) should no `episodes` be excluded.
+`exclude` filter in `/library/episodes`, `/library/episodes/label` and `/library/newepisodes`. Parameter is comma separated integers. The call should only return `episodes` where the `episodes` `lastevent` is not one of the listed types. If no exclude parameter is provided must the server use a default filter of “70” (deleted). If the parameter is empty (“”) must no `episodes` be excluded.
 
 ### Library/Events
 `events` are how the clients keeps track of the users playback progression. They relate to common actions performed on the client.
@@ -228,7 +232,7 @@ Exclude filter in `/library/episodes` and `/library/episodes/label`. The call sh
 	</tr>
 	<tr>
 		<td>10</td>
-		<td>Start. Playback started. Also used to undelete/reset playback status. Allmost equal to no event (positionts= 0).</td>
+		<td>Start. Playback started. Also used to undelete/reset playback status. Allmost equal to no event (`positionts` must be 0).</td>
 	</tr>
 	<tr>
 		<td>20</td>
@@ -240,27 +244,29 @@ Exclude filter in `/library/episodes` and `/library/episodes/label`. The call sh
 	</tr>
 	<tr>
 		<td>40</td>
-		<td>Sleeptimer start. This indicates where a sleeptimer was initiated. Concurrentorder must be 1 less than the concurrentorder for the Sleeptimer end event.</td>
+		<td>Sleeptimer start. This indicates where a sleeptimer was initiated. Concurrentorder must be 1 less than the `concurrentorder` for the Sleeptimer end event.</td>
 	</tr>
 	<tr>
 		<td>50</td>
-		<td>Sleeptimer end. This indicates where a sleeptimer is intended to end. Should be sent with Sleeptimer start, the actual end of a sleeptimer is indicated with a pause at the end of the timer.Concurrentorder must be 1 more than the concurrentorder for the Sleeptimer end event..</td>
+		<td>Sleeptimer end. This indicates where a sleeptimer is intended to end. Should be sent with Sleeptimer start, the actual end of a sleeptimer is indicated with a pause at the end of the timer. `concurrentorder` must be 1 more than the `concurrentorder` for the Sleeptimer end event.</td>
 	</tr>
 	<tr>
 		<td>60</td>
-		<td>End of track. The playback has reached the end of the file and can be expected to have been listened to completely. Depending on settings, the episode might be deleted.</td>
+		<td>End of track. The playback has reached the end of the file and can be expected to have been listened to completely.</td>
 	</tr>
 	<tr>
 		<td>70</td>
-		<td>Delete. The user has explicitly indicated (by action or setting) that the episode should be deleted. Clients no longer needs to maintain data about this episode unless the user explicitly ask for it.</td>
+		<td>Delete. The user has explicitly indicated (by action) that the episode should be deleted. Clients no longer needs to maintain data about this episode unless the user explicitly ask for it.</td>
 	</tr>
 </table>
 
-More complex `events` are built up of combinations of `events`. If a users skips from one position to another, the client should then send 2 events with the same `ClientTS`. The first event should be a pause event with a concurrentorder of 0. The second event should be a play event with the new player position and a concurrentorder of 1.
+More complex `events` are built up of combinations of `events`. If a users skips from one position to another, the client should then send 2 events with the same `ClientTS`. The first event should be a pause `event` with a `concurrentorder` of 0. The second `event` should be a play event with the new `positionts` and a `concurrentorder` of 1.
 
-Clients following a streaming model might not need to fetch events, as the most recent event is included when getting episodes. Some clients might offer the ability to show a list of the users events. This might better help the user find back to where they last were.Streaming model clients that offers a complete eventlist should use the cast id to speed up the request. If your syncing model client does not offer this functionality, you don’t need to store more than the last event for each episode.
+Some clients might not skip but seek. A seek begins with a pause `event` when playback starts at seeking speeds. Seek is ended with a play `event` when seeking speed is ended and playback is returned to regual playback speed.
 
-Events should be sent to the server as fast as possible. For reliabilety it is recomended that you keep an output buffer of events as they occur, then retry sending them until they successfully gets sent.
+Clients following a streaming model might not need to fetch `events`, as the most recent `event` is included when getting episodes. Some clients might offer the ability to show a list of the users events. This might better help the user find back to where they last were. Streaming model clients that offers a complete eventlist should use the `cast id` to speed up the request. Syncing model client that does not offer this functionality, do not need to store more than the `lastevent` for each `episode`.
+
+`events` should be sent to the server as fast as possible. It is recomended that clients keep an output buffer of `events` as they occur, then retry sending them until they successfully gets sent.
 
 __Example:__
 ```Shell
