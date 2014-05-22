@@ -75,7 +75,7 @@ curl https:// UrlPath /api/account/login -d username=user -d password=*** -d cli
 <script src="https://gist.github.com/basso/0b84947441aeac8c8c2e.js?file=account-login"></script>
 
 #### UUID
-The `UUID` is used to identify the client even if the token is expired. This is to reduce the number of duplicate client registrations. The UUID can be given by the platform or just some random characters (should be 8 characters or more, preferably 256 bit / 32 characters) that is stored for further reference.
+The `UUID` is a string used to identify the client instanse even if the `token` is expired. The `UUID` is used to reduce the number of duplicate client registrations on the server. The client can accwire a `UUID` string from its platform, or just generate a random string and permanently write it to storage. The string should be at least 8 characters, preferably 256 bit / 32 characters. The string should be unique for every device, but the same for the duration of the deplyment on the device.
 
 The `UUID` is the only thing that is intended to be kept after a user explicitly signs out.
 
@@ -98,15 +98,15 @@ curl http:// UrlPath /api/account/ping -H "Authorization:1337EGAh10qpLDq7xDTXG41
 Check if the token is valid.
 
 ### Account/Settings
-Clients are able to store the users `settings` server side. This makes the syncing experience more seamless. By default all `settings` are global for all clients, but clients can create `clientspesific` overrides. `clientspesific` overrides will apply for all clients with the same client `name`. Global settings are intended for common `settings` with common `values`. If a client uses uncommon settings `values` or doesn't understand the current setting `value`, the client must create overrides with its `settings` to avoid conflicts. A user might use one client differently than their other clients, and might want to configure this client separately from rest. In these cases clients should offer the ability for users to toggle overrides of settings so that they don't propagate to other clients. When a user untoggles a settings-override the client must ask if the user wants to keep the `value` from the override or the global `setting`.
+Clients are able to store the users `settings` server side. This makes the syncing experience more seamless. By default all `settings` are global for all clients, but clients can create `clientspesific` overrides. `clientspesific` overrides will apply for all clients with the same client `name`. Global settings are intended for common `settings` with common `values`. If a client uses uncommon settings `values` or doesn't understand the current setting `value`, the client must overrides the `setting` to avoid conflicts. A user might use one client differently than their other clients, and might want to configure this client separately from rest. In these cases clients should offer the ability for users to toggle overrides of settings so that they don't propagate to other clients. When a user untoggles a settings-override the client must ask if the user wants to keep the `value` from the override or the global `setting`.
 
-Clients needs to bring their own set of supported `settings` and `values` with client recommended defaults. If a `setting` does not exist the client should set and use its own default. A client should not overwrite the users global settings with it's defaults unless the user asks for it. If a current settings value is not understood the client should set its default as a setting override and use it. The server side does not change its behaviur depending on settings, it merly is storing them. It is up to the client to implement the settings functionality.
+The client has to implement it's own set of supported settings and values with appropriate default values. If a `setting` does not exist, the client should set and use the default values. A client should not overwrite the users global settings with it's defaults, unless the user asks for it. If a current settings `value` is not understood the client, should the client set its default as a override and use the override. The server side does not change its behaviour depending on settings, it only stores them. It is up to the client to implement the settings functionality.
 
 Clients are not required to show any UI for configuring a setting. If some information about the clients state is required to save, `settings` with `clientspesific` overrides might be a good place to put it.
 
 We hope that developers can come together and create a common list of `setting keys` and `values`. Therefor we suggest using these keys and `values` when implementing settings for related functionality in clients:
 
-Changes to `settings` should be sent to the server as fast as possible. It is recomended that clients keep an output buffer of these changes as they occur, then retry sending them until they successfully gets sent.
+Changes to `settings` should be sent to the server as fast as possible. It is recommended that clients keep an output buffer of these changes as they occur, then retry sending them until they successfully gets sent.
 <!-- MORE, til review -->
 
 <table style="overflow: auto;">
@@ -170,12 +170,12 @@ Changes to `settings` should be sent to the server as fast as possible. It is re
 __Notice:__ `Setting keys` are not a rigid part of the specification, but an attempt to find common ground. This list will be modified as per developer adoption unrelated of api versioning to set a common ground.
 
 #### Server logic
-The server should send all the users global `settings` and all `settings` with `clientspesific` overrides for the active client. The server needs to keep track of what client set `settings` with `clientspesific` overrides. The `clientspesific` override is applicable to all clients with the same client name string, and is not spesific to the clients `UUID` or `token`. Several instances of a client can keep their `clientspesific` `settings` in sync across several devices.
+The server should send all the users global `settings` and all `settings` with `clientspesific` overrides for the active client. The server needs to keep track of which client specified the `clientspesific` override. The `clientspesific` override is applicable to all clients with the same client name string, and is not spesific to the clients `UUID` or `token`. Several instances of a client can keep their `clientspesific` `settings` in sync across several devices.
 
 ### Library/Casts
 `casts` is the the users subscriptions. Each `cast` has its own unique `cast id`. Adding a cast to the user subscription list only requires an `URL` of a valid podcast feed. By using the `cast id` the client can edit and delete a subscription from the library. It is also possible to import and export casts via opml.
 
-Changes to `casts` should be sent to the server as fast as possible. It is recomended that clients keep an output buffer of these changes as they occur, then retry sending them until they successfully gets sent.
+Changes to `casts` should be sent to the server as fast as possible. It is recommended that clients keep an output buffer of these changes as they occur, then retry sending them until they successfully gets sent.
 
 __Example:__
 ```Shell
@@ -266,7 +266,7 @@ Some clients might not skip but seek. A seek begins with a pause `event` when pl
 
 Clients following a streaming model might not need to fetch `events`, as the most recent `event` is included when getting episodes. Some clients might offer the ability to show a list of the users events. This might better help the user find back to where they last were. Streaming model clients that offers a complete eventlist should use the `cast id` to speed up the request. Syncing model client that does not offer this functionality, do not need to store more than the `lastevent` for each `episode`.
 
-`events` should be sent to the server as fast as possible. It is recomended that clients keep an output buffer of `events` as they occur, then retry sending them until they successfully gets sent.
+`events` should be sent to the server as fast as possible. It is recommended that clients keep an output buffer of `events` as they occur, then retry sending them until they successfully gets sent.
 
 __Example:__
 ```Shell
