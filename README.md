@@ -7,7 +7,7 @@ Castcloud is a RESTful API specifying how podcast clients can communicate a user
 The server side of the API provides centralized metadata storage for making personal podcast libraries available to multiple clients. The metadata of the library includes subscriptions, episodes, playback status and settings. The server side takes care of feed crawling so that clients doesn't have to individually crawl all the users feeds. This improves speed and simplefies some of the clients work.
 
 ### Reference implementations
-We have made reference implementations of both server and client. The reference server implementation has all server side functionality and the reference client uses a syncing model as far as possible for modern browsers (offline media storage is currently problematic), and falls back to streaming when syncing is impossible.
+We have made reference implementations of both server and client. The reference server implementation has all server side functionality and the reference client uses a synchronizing model as far as possible for modern browsers (offline media storage is currently problematic), and falls back to streaming when synchronizing is impossible.
 
 ### License
 All code is GPLv3 with some included utilities and libraries being Apache 2.0 and MIT License. This means you are free to make commercial software or solutions with our code, and in fact we encourage it!
@@ -21,10 +21,10 @@ We are 3 bachelor computer science students from Narvik University College in No
 ## Clients
 A client in this documentation is a piece of software run by a user on any compatible platform. A client is identified by its `name`, regardless of developer or platform. Different instances of a client is identified to the server by its `UUID` or `token`, and by its client `name` and `decription` to users.
 
-There are 2 client models intended for use with the API. Hybrid models are also possible. Both streaming and syncing are equal in functionality, however it is recommended implementing as much syncing functionality as possible on the clients platform. Syncing improves the user experience as the client has a local copy of the library state. This increases the clients speed and enables offline functionality.
+There are 2 client models intended for use with the API. Hybrid models are also possible. Both streaming and synchronizing are equal in functionality, however it is recommended implementing as much synchronizing functionality as possible on the clients platform. Synchronizing improves the user experience as the client has a local copy of the library state. This increases the clients speed and enables offline functionality.
 
 ### Synchronizing
-The primary part of a syncing client is making sure it has `episodes`, `casts`, `events`, `labels` and `settings` stored locally. Fetching of `events` and `episodes` can be accelerated using a `since` timestamp and correct filtering. Clients will have to remove `episodes` from its library when it gets delete `events` or a `cast` gets removed (unsubscribed to).
+The primary part of a synchronizing client is making sure it has `episodes`, `casts`, `events`, `labels` and `settings` stored locally. Fetching of `events` and `episodes` can be accelerated using a `since` timestamp and correct filtering. Clients will have to remove `episodes` from its library when it gets delete `events` or a `cast` gets removed (unsubscribed to).
 
 To be fully offline capable, the client needs manage the related media files locally.
 ### Streaming
@@ -98,7 +98,7 @@ curl http:// UrlPath /api/account/ping -H "Authorization:1337EGAh10qpLDq7xDTXG41
 Check if the token is valid.
 
 ### Account/Settings
-Clients are able to store the users `settings` server side. This makes the syncing experience more seamless. By default all `settings` are global for all clients, but clients can create `clientspesific` overrides. `clientspesific` overrides will apply for all clients with the same client `name`. Global settings are intended for common `settings` with common `values`. If a client uses uncommon settings `values` or doesn't understand the current setting `value`, the client must overrides the `setting` to avoid conflicts. A user might use one client differently than their other clients, and might want to configure this client separately from rest. In these cases clients should offer the ability for users to toggle overrides of settings so that they don't propagate to other clients. When a user untoggles a settings-override the client must ask if the user wants to keep the `value` from the override or the global `setting`.
+Clients are able to store the users `settings` server side. This makes the synchronizing experience more seamless. By default all `settings` are global for all clients, but clients can create `clientspesific` overrides. `clientspesific` overrides will apply for all clients with the same client `name`. Global settings are intended for common `settings` with common `values`. If a client uses uncommon settings `values` or doesn't understand the current setting `value`, the client must overrides the `setting` to avoid conflicts. A user might use one client differently than their other clients, and might want to configure this client separately from rest. In these cases clients should offer the ability for users to toggle overrides of settings so that they don't propagate to other clients. When a user untoggles a settings-override the client must ask if the user wants to keep the `value` from the override or the global `setting`.
 
 The client has to implement it's own set of supported settings and values with appropriate default values. If a `setting` does not exist, the client should set and use the default values. A client should not overwrite the users global settings with it's defaults, unless the user asks for it. If a current settings `value` is not understood the client, should the client set its default as a override and use the override. The server side does not change its behaviour depending on settings, it only stores them. It is up to the client to implement the settings functionality.
 
@@ -199,15 +199,16 @@ curl https:// UrlPath /api/library/newepisodes -H "Authorization:SuperSecretToke
 ```
 <script src="https://gist.github.com/basso/0b84947441aeac8c8c2e.js?file=library-episodes"></script>
 
-#### Syncing model (Library/Newepisodes)
-If the client is using a syncing client model we recommend using `newepisodes` and related calls as you can get episodes for all feeds with 1 call. In addition you can save a lot of data transfer when using the `since` parameter. When providing a `since` parameter, please use the `timestamp` included with the last result, and not one from the client side as these might differ.
+#### Synchronizing model (Library/Newepisodes)
+If the client is using a synchronizing client model we recommend using `newepisodes` and related calls as you can get episodes for all feeds with 1 call. In addition you can save a lot of data transfer when using the `since` parameter. When providing a `since` parameter, please use the `timestamp` included with the last result, and not one from the client side as these might differ.
 
-Please note that using a syncing model will force you to get events from `/library/events` as the `lastevent` included with each `episode` will quickly get outdated. If you see a new `event` for an `episode` that you don't have locally, this means the user has undeleted the `episode`. Retrieve it with `/library/episode/{episodeid}`.
-
-If the user wants to see all `episodes` of a podcast (included deleted) use the `/library/episodes/{castid}` with "" as a filter. With this information the user will be able to reset playback status (undelete) for the `casts` `episodes`. Clients undeletes `episodes` with sending a new start event (type 10). Most syncing clients should implement this as an online only feature.
+Please note that using a synchronizing model will force you to get events from `/library/events` as the `lastevent` included with each `episode` will quickly get outdated. If you see a new `event` for an `episode` that you don't have locally, this means the user has undeleted the `episode`. Retrieve it with `/library/episode/{episodeid}`.
 
 #### Streaming model (Library/Episodes)
 If you are using a streaming model all you will need to use is `/library/episodes`. Before you can call it however you need have the information from `/library/casts` or `/library/labels` as `cast id` or `label id` is a required parameter.
+
+### Deleted / hidden episodes
+A user would normaly keep deleting episodes as they complete listening to it. This means the episodes would disappear from the normal interface. Deleted `episodes` are still stored on the server. To get the complete list of `episodes` use the `/library/episodes/{castid}` with "" as `exclude` parameter. When a client displays the complete list of `episodes`, the user should have the option to reset the playback status. Clients undeletes `episodes` with sending a new start event (type 10). Most synchronizing clients should implement this as an online only feature.
 
 #### Server logic
 `/library/episodes`, `/library/episode` and `/library/newepisodes` all return `episodes` in the same format. The biggest difference are the filters defined in input parameters. `/library/newepisodes` must also include a timestamp of when it was generated. The `feed` in each `episode` is a json representation of `items` xml. `/library/episode` only returns 1 episode at the time, please note that this should not be inside a list of episodes.
@@ -264,7 +265,7 @@ More complex `events` are built up of combinations of `events`. If a users skips
 
 Some clients might not skip but seek. A seek begins with a pause `event` when playback starts at seeking speeds. Seek is ended with a play `event` when seeking speed is ended and playback is returned to regual playback speed.
 
-Clients following a streaming model might not need to fetch `events`, as the most recent `event` is included when getting episodes. Some clients might offer the ability to show a list of the users events. This might better help the user find back to where they last were. Streaming model clients that offers a complete eventlist should use the `cast id` to speed up the request. Syncing model client that does not offer this functionality, do not need to store more than the `lastevent` for each `episode`.
+Clients following a streaming model might not need to fetch `events`, as the most recent `event` is included when getting episodes. Some clients might offer the ability to show a list of the users events. This might better help the user find back to where they last were. Streaming model clients that offers a complete eventlist should use the `cast id` to speed up the request. Synchronizing model client that does not offer this functionality, do not need to store more than the `lastevent` for each `episode`.
 
 `events` should be sent to the server as fast as possible. It is recommended that clients keep an output buffer of `events` as they occur, then retry sending them until they successfully gets sent.
 
