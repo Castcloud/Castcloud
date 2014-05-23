@@ -75,7 +75,7 @@ curl https:// UrlPath /api/account/login -d username=user -d password=*** -d cli
 <script src="https://gist.github.com/basso/0b84947441aeac8c8c2e.js?file=account-login"></script>
 
 #### UUID
-The `UUID` is a string used to identify the client instanse even if the `token` is expired. The `UUID` is used to reduce the number of duplicate client registrations on the server. The client can accwire a `UUID` string from its platform, or just generate a random string and permanently write it to storage. The string should be at least 8 characters, preferably 256 bit / 32 characters. The string should be unique for every device, but the same for the duration of the deplyment on the device.
+The `UUID` is a string used to identify the client instanse even if the `token` is expired. The `UUID` is used to reduce the number of duplicate client registrations on the server. The client can acquire a `UUID` string from its platform, or just generate a random string and permanently write it to storage. The string should be at least 8 characters, preferably 256 bit / 32 characters. The string should be unique for every device, but the same for the duration of the deplyment on the device.
 
 The `UUID` is the only thing that is intended to be kept after a user explicitly signs out.
 
