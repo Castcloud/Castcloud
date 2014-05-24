@@ -16,6 +16,9 @@ In the spirit of making something really useful for all users of podcasting soft
 ### Who we are
 We are 3 bachelor computer science students from Narvik University College in Norway. We are working on this project as our bachelor thesis. We hope to have a specification ready for implementation in time for our graduation in the beginning of June 2014. We hope this API specification will help solve an issue that in our opinion has plagued and hampered further growth and user adoption of podcasts.
 
+### Terminology
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119.
+
 ## Clients
 A client in this documentation is a piece of software run by a user on any compatible platform. A client is identified by its `name`, regardless of developer or platform. Different instances of a client is identified to the server by its `UUID` or `token`, and by its client `name` and `decription` to users.
 
