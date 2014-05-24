@@ -107,7 +107,7 @@ Clients are not required to show any UI for configuring a setting. If some infor
 Changes to `settings` should be sent to the server as fast as possible. It is recommended that clients keep an output buffer of these changes as they occur, then retry sending them until they successfully gets sent.
 
 We hope that developers can come together and create a common list of `setting keys` and `values`. Therefore we suggest using these keys and `values` when implementing settings for related functionality in clients:
-<table style="overflow: auto;">
+<table>
 	<tr>
 		<th>Setting key</th>
 		<th>Values (String formatted)</th>
@@ -116,7 +116,7 @@ We hope that developers can come together and create a common list of `setting k
 	<tr>
 		<td>playback/forward_skip</td>
 		<td rowspan="2">15s, 10%</td>
-		<td rowspan="2">Integer followed by a unit character. Available unit characters are "s" = seconds, "%" = percentage of the medias total duration. </td
+		<td rowspan="2">Integer followed by a unit character. Available unit characters are "s" = seconds, "%" = percentage of the medias total duration.</td>
 	</tr>
 	<tr>
 		<td>playback/backward_skip</td>
@@ -210,16 +210,37 @@ A user would normaly keep deleting episodes as they complete listening to it. Th
 
 #### Server logic
 `/library/episodes`, `/library/episode` and `/library/newepisodes` all return `episodes` in the same format. The biggest difference are the filters defined in input parameters. `/library/newepisodes` must also include a timestamp of when it was generated. The `feed` in each `episode` is a JSON representation of `items` xml. `/library/episode` only returns one episode at a time, please note that this should not be inside a list of episodes.
-<!-- MORE TABLE SEMPAI! -->
-`since` filter in `/library/newepisode`. The call should filter to only return episodes stored after this time.
 
-`episode id` filter in `/library/episode`. Required parameter, should show error if not provided. The call should only return the one episode with the specified episode id.
+<table>
+	<tr>
+		<th>Parameter</th>
+		<th>Use</th>
+		<th style="min-width:160px"></th>
+	</tr>
+	<tr>
+		<td>`since`</td>
+		<td>`/library/newepisode`</td>
+		<td>The call must only return episodes stored after this time.</td>
+	</tr>
+	<tr>
+		<td>`episode id`</td>
+		<td>`/library/episode`</td>
+		<td>Required parameter, should show error if not provided. The call must only return the one episode with the specified episode id.</td>
+	</tr>
+		<td>`cast id`</td>
+		<td>`/library/episodes`</td>
+		<td>Required parameter, should show error if not provided. The call should only return episodes for the casts with the specified `cast id`.</td>
+	</tr>
+		<td>`label id`</td>
+		<td>`/library/episodes/label`</td>
+		<td>Required parameter, should show error if not provided. The call should only return episodes for casts inside the specified label.</td>
+	</tr>
+		<td>`exclude`</td>
+		<td>`/library/episodes`<br>`/library/episodes/label`<br>`/library/newepisodes`</td>
+		<td>Parameter is comma separated integers. The call should only return `episodes` where the `episodes` `lastevent` is not one of the listed types. If no exclude parameter is provided must the server use a default filter of “70” (deleted). If the parameter is empty (“”) must no `episodes` be excluded.</td>
+	</tr>
+</table>
 
-`cast id` filter in `/library/episodes`. Required parameter, should show error if not provided. The call should only return episodes for the casts with the specified `cast id`.
-
-`label id` filter in `/library/episodes/label`. Required parameter, should show error if not provided. The call should only return episodes for casts inside the specified label.
-
-`exclude` filter in `/library/episodes`, `/library/episodes/label` and `/library/newepisodes`. Parameter is comma separated integers. The call should only return `episodes` where the `episodes` `lastevent` is not one of the listed types. If no exclude parameter is provided must the server use a default filter of “70” (deleted). If the parameter is empty (“”) must no `episodes` be excluded.
 
 ### Library/Events
 `events` are how clients keeps track of the users playback progression. They relate to common actions performed on the client.
@@ -274,12 +295,24 @@ curl https:// UrlPath /api/library/events -H "Authorization:SuperSecretToken"
 <script src="https://gist.github.com/basso/0b84947441aeac8c8c2e.js?file=library-events"></script>
 
 #### Server logic
-<!-- MORE TABLE SEMPAI! -->
-`since` filter. The call should filter to only return events received/stored after this time.
-
-`episode id` filter. The call should only return `events` for the specified `episode`.
-
-`exclude` filter. The call should only return `events` where the `episodes` last `event` is not one of the listed `types`. If no `exclude` parameter is provided, the server must use a default filter of “70” (deleted). To completely disable the exclude filter submit the parameter but leave it empty (“”).
+<table>
+	<tr>
+		<th>Parameter</th>
+		<th style="min-width:160px"></th>
+	</tr>
+	<tr>
+		<td>`since`</td>
+		<td>The call must only return events received/stored after this time.</td>
+	</tr>
+	<tr>
+		<td>`episode id`</td>
+		<td>The call must only return `events` for the specified `episode`.</td>
+	</tr>
+	<tr>
+		<td>`exclude`</td>
+		<td>The call must only return `events` where the `episodes` last `event` is not one of the listed `types`. If no `exclude` parameter is provided, the server must use a default filter of “70” (deleted). To completely disable the `exclude` filter submit the parameter but leave it empty (“”).</td>
+	</tr>
+</table>
 
 ### Library/Labels
 With labels you group and sort your subscriptions in clients.
