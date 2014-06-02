@@ -231,10 +231,12 @@ Users would normally keep deleting episodes as they finish listening to them. Th
 		<td>`/library/episodes`</td>
 		<td>Required parameter, should show error if not provided. The call should only return episodes for the casts with the specified `cast id`.</td>
 	</tr>
+	<tr>
 		<td>`label id`</td>
 		<td>`/library/episodes/label`</td>
 		<td>Required parameter, should show error if not provided. The call should only return episodes for casts inside the specified label.</td>
 	</tr>
+	<tr>
 		<td>`exclude`</td>
 		<td>`/library/episodes`<br>`/library/episodes/label`<br>`/library/newepisodes`</td>
 		<td>Parameter is comma separated integers. The call should only return `episodes` where the `episodes` `lastevent` is not one of the listed types. If no exclude parameter is provided must the server use a default filter of “70” (deleted). If the parameter is empty (“”) must no `episodes` be excluded.</td>
